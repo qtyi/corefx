@@ -1,0 +1,125 @@
+<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+<Project>
+
+  <PropertyGroup>
+    <CoreLibraryTargetFrameworks>net6.0;netcoreapp3.1;netstandard2.0</CoreLibraryTargetFrameworks>
+    <ExecutableTargetFrameworks>net7.0;netcoreapp3.1;net472</ExecutableTargetFrameworks>
+    <TestTargetFrameworks>net7.0;netcoreapp3.1;net472</TestTargetFrameworks>
+    
+    <!-- Disable the implicit nuget fallback folder as it makes it hard to locate and copy ref assemblies to the test output folder -->
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+    <UseSharedCompilation>true</UseSharedCompilation>
+    
+    <Features>strict</Features>
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GenerateFullPaths>true</GenerateFullPaths>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">15.0</VisualStudioVersion>
+    <VisualStudioReferenceMajorVersion Condition="'$(VisualStudioReferenceMajorVersion)' == ''">$(VisualStudioVersion.Substring($([System.Convert]::ToInt32(0)), $(VisualStudioVersion.IndexOf('.'))))</VisualStudioReferenceMajorVersion>
+    <VisualStudioReferenceAssemblyVersion Condition="'$(VisualStudioReferenceAssemblyVersion)' == ''">$(VisualStudioReferenceMajorVersion).0.0.0</VisualStudioReferenceAssemblyVersion>
+    <MinimumVisualStudioVersion>$(VisualStudioVersion)</MinimumVisualStudioVersion>
+    <MinimumMSBuildVersion>15.7.0</MinimumMSBuildVersion>
+
+    <!-- Disable AppX packaging for the Luna source. Not setting this to false has the side effect
+         that any builds of portable projects end up in a sub folder of $(OutputPath). Search for this flag in
+         Microsoft.Common.CurrentVersion.targets to see how it is consumed -->
+    <WindowsAppContainer>false</WindowsAppContainer>
+
+    <!-- Used to control the running of the GenerateSatelliteAssemblies and CoreGenerateSatelliteAssemblies targets -->
+    <GenerateSatelliteAssemblies>true</GenerateSatelliteAssemblies>
+
+    <EnableDefaultNoneItems>false</EnableDefaultNoneItems>
+    <Nullable>enable</Nullable>
+    <DiscoverEditorConfigFiles>true</DiscoverEditorConfigFiles>
+
+    <!-- VS does not require Windows PDBs to be published anymore. -->
+    <PublishWindowsPdb>false</PublishWindowsPdb>
+  </PropertyGroup>
+
+  <!--
+    Disable Source Link and Xliff in WPF temp projects to avoid generating non-deterministic file names to obj dir.
+    The project name is non-deterministic and is included in the Source Link json file name and xlf directory names.
+    It's also not necessary to generate these assets.
+  -->
+  <PropertyGroup Condition="'$(IsWpfTempProject)' == 'true'">
+    <EnableSourceLink>false</EnableSourceLink>
+    <DeterministicSourcePaths>false</DeterministicSourcePaths>
+    <EnableXlfLocalization>false</EnableXlfLocalization>
+  </PropertyGroup>
+  
+  <!--
+    Disable Xliff if it's not necessary to generate satellite assemblies.
+  -->
+  <PropertyGroup Condition="'$(GenerateSatelliteAssemblies)' == 'false'">
+    <EnableXlfLocalization>false</EnableXlfLocalization>
+  </PropertyGroup>
+
+  <!-- Language-specific analyzer packages -->
+  <Choose>
+    <When Condition="'$(Language)' == 'VB'">
+      <ItemGroup Condition="'$(CoreFxCheckCodeStyle)' == 'true'">
+        <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.CodeStyle" Version="$(MicrosoftCodeAnalysisVisualBasicCodeStyleVersion)" PrivateAssets="all" />
+      </ItemGroup>
+    </When>
+
+    <When Condition="'$(Language)' == 'C#'">
+      <ItemGroup Condition="'$(CoreFxCheckCodeStyle)' == 'true'">
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeStyle" Version="$(MicrosoftCodeAnalysisCSharpCodeStyleVersion)" PrivateAssets="all" />
+      </ItemGroup>
+    </When>
+  </Choose>
+
+  <PropertyGroup Condition="'$(CoreFxEnforceCodeStyle)' != 'true'">
+    <!-- Don't treat FormattingAnalyzer as an error, even when TreatWarningsAsErrors is specified. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);IDE0055</WarningsNotAsErrors>
+  </PropertyGroup>
+
+  <!--
+    Language specific settings
+  -->
+  <Choose>
+    <!-- VB specific settings -->
+    <When Condition="'$(Language)' == 'VB'">
+      <PropertyGroup>
+        <LangVersion>latest</LangVersion>
+        <NoWarn>$(NoWarn);40057</NoWarn>
+        <VBRuntime>Embed</VBRuntime>
+      </PropertyGroup>
+      <ItemGroup>
+        <Import Include="Microsoft.VisualBasic" />
+        <Import Include="System" />
+        <Import Include="System.Collections" />
+        <Import Include="System.Collections.Generic" />
+        <Import Include="System.Diagnostics" />
+        <Import Include="System.Linq" />
+      </ItemGroup>
+      <PropertyGroup>
+        <DefineConstants Condition="'$(InitialDefineConstants)' != ''">$(InitialDefineConstants)</DefineConstants>
+      </PropertyGroup>
+    </When>
+
+    <!-- C# specific settings -->
+    <When Condition="'$(Language)' == 'C#'">
+      <PropertyGroup>
+        <LangVersion>preview</LangVersion>
+        <WarningLevel>9999</WarningLevel>
+        <ErrorReport>prompt</ErrorReport>
+
+        <!-- Suppress the following warnings by default for C# projects
+                1573: Suppressed in order to allow documentation for some but not all parameters.
+                      A warning will still be reported if the documentation defines/references a
+                      parameter which does not exist.
+                1591: So far we've chosen to implicitly implement interfaces and as a consequence
+                      the methods are public.  We don't want to duplicate documentation for them
+                      and hence suppress this warning until we get closer to release and a more
+                      thorough documentation story
+        -->
+        <NoWarn>$(NoWarn);1573;1591;1701</NoWarn>
+      </PropertyGroup>
+      <PropertyGroup>
+        <DefineConstants Condition="'$(InitialDefineConstants)' != ''">$(DefineConstants);$(InitialDefineConstants)</DefineConstants>
+      </PropertyGroup>
+    </When>
+  </Choose>
+
+</Project>

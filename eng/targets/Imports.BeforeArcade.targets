@@ -1,0 +1,15 @@
+<!-- Licensed to the Qtyi under one or more agreements. The Qtyi licenses this file to you under the MIT license. See the LICENSE file in the project root for more information. -->
+<Project>
+  <!--
+    Targets included after project file and before Arcade SDK targets.
+    Use to set Arcade SDK properties that depend on properties set in the project file.
+  -->
+  
+  <PropertyGroup Condition="'$(IsSymbolPublishingPackage)' == 'true'">
+    <IsPackable>true</IsPackable>
+    <IsShippingPackage>false</IsShippingPackage>
+    <PackageId>$(AssemblyName).Symbols</PackageId>
+    <PackageId Condition="'$(PlatformTarget)' != '' and '$(PlatformTarget)' != 'AnyCPU'">$(AssemblyName).$(PlatformTarget).Symbols</PackageId>
+  </PropertyGroup>
+
+</Project>
