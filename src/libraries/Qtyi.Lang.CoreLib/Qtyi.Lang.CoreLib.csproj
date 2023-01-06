@@ -12,6 +12,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="Qtyi.Lang.CoreLib.UnitTests" />
+  </ItemGroup>
+  
+  <ItemGroup>
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
     <PackageReference Include="System.Memory" Version="4.5.5" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
   </ItemGroup>

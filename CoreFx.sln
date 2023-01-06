@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Qtyi.Lang.CoreLib", "src\libraries\Qtyi.Lang.CoreLib\Qtyi.Lang.CoreLib.csproj", "{D94B5C9E-9694-4044-B9D6-8F42867B7EDC}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Qtyi.Lang.CoreLib.UnitTests", "src\tests\Qtyi.Lang.CoreLib.UnitTests\Qtyi.Lang.CoreLib.UnitTests.csproj", "{B37B85CA-EC0D-48F6-9B61-1743D5E2DEC4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{D94B5C9E-9694-4044-B9D6-8F42867B7EDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D94B5C9E-9694-4044-B9D6-8F42867B7EDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D94B5C9E-9694-4044-B9D6-8F42867B7EDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B37B85CA-EC0D-48F6-9B61-1743D5E2DEC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B37B85CA-EC0D-48F6-9B61-1743D5E2DEC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B37B85CA-EC0D-48F6-9B61-1743D5E2DEC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B37B85CA-EC0D-48F6-9B61-1743D5E2DEC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

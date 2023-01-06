@@ -65,6 +65,8 @@ public class Table : Object
         return this.mt;
     }
 
+    public virtual void Add(Object index, Object? value) => this[index] = value;
+
     /// <summary>
     /// 获取表中指定键对应的值，忽略元表的影响。
     /// </summary>
@@ -150,7 +152,7 @@ public class Table : Object
     [return: Tuple(3)]
     [return:
         TupleItemType(0, typeof(Function)),
-        TupleItemTypeSameAs(1, "t"),
+        TupleItemTypeSameAs(1, nameof(t)),
         TupleItemType(2, typeof(long))
     ]
     public static MultiReturns IndexedPair(Table t)
@@ -167,7 +169,7 @@ public class Table : Object
     [return: Tuple(2)]
     [return:
         TupleItemType(0, typeof(Func<Table, Object?, Object?>)),
-        TupleItemTypeSameAs(1, "t")
+        TupleItemTypeSameAs(1, nameof(t))
     ]
     public static MultiReturns Pair(Table t)
     {
