@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Qtyi.Lang.CoreLib.UnitTests;
 
@@ -11,6 +12,18 @@ using Qtyi.Runtime;
 public abstract class PrimitiveTestBase
 {
     protected static readonly Random s_random = new();
+
+    public static IEnumerable<Type> GetPrimitiveTypes() => new[]
+    {
+        typeof(Boolean),
+        typeof(Function),
+        typeof(Number),
+        typeof(String),
+        typeof(Table),
+        //typeof(Thread),
+        typeof(TypeInfo),
+        typeof(Userdata)
+    };
 
     public static Object GetRandomObject()
     {

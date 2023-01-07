@@ -8,8 +8,8 @@ using System.Linq.Expressions;
 
 namespace Qtyi.Runtime;
 
-public readonly struct MultiReturns<T> : IReadOnlyList<Object?>, IDynamicMetaObjectProvider
-    where T : Object
+public readonly struct MultiReturns<T1> : IMultiReturns
+    where T1 : Object
 {
     private readonly MultiReturns _values;
 
@@ -17,14 +17,13 @@ public readonly struct MultiReturns<T> : IReadOnlyList<Object?>, IDynamicMetaObj
 
     public int Count => this._values.Count;
 
-    public T? Value => (T?)this[0];
+    public T1? Value1 => (T1?)this[0];
 
-    public MultiReturns(T? value) => this._values = new(value);
+    public MultiReturns(T1? value1) => this._values = new(value1);
 
     #region 解构
-    public void Deconstruct(out T? value) => value = this.Value;
-
-    public void Deconstruct(out Object? value) => this._values.Deconstruct(out value);
+    /// <inheritdoc cref="MultiReturns.Deconstruct(out Object?)"/>
+    public void Deconstruct(out T1? value1) => value1 = this.Value1;
     #endregion
 
     #region IReadOnlyList<Object?>
@@ -33,9 +32,5 @@ public readonly struct MultiReturns<T> : IReadOnlyList<Object?>, IDynamicMetaObj
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     #endregion
 
-    #region IDynamicMetaObjectProvider
-    DynamicMetaObject IDynamicMetaObjectProvider.GetMetaObject(Expression parameter) => ((IDynamicMetaObjectProvider)this._values).GetMetaObject(parameter);
-    #endregion
-
-    public static implicit operator MultiReturns(MultiReturns<T> values) => values._values;
+    public static implicit operator MultiReturns(MultiReturns<T1> values) => values._values;
 }

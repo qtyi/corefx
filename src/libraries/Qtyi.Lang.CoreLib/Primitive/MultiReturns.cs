@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace Qtyi.Runtime;
 
-public readonly struct MultiReturns : IReadOnlyList<Object?>, IDynamicMetaObjectProvider
+public readonly struct MultiReturns : IMultiReturns
 {
     private readonly int _offset;
     private readonly int _count;
@@ -152,9 +152,148 @@ public readonly struct MultiReturns : IReadOnlyList<Object?>, IDynamicMetaObject
     }
     #endregion
 
-    DynamicMetaObject IDynamicMetaObjectProvider.GetMetaObject(Expression parameter)
+    public static object CreateInstance(params Object?[] values) =>
+        CreateInstance(MakeInstanceType(0, values), 0, (Object?[])values.Clone());
+
+    public static object CreateInstance(IEnumerable<Object?> values)
     {
-#warning 未实现。
-        throw new NotImplementedException();
+        var array = values.ToArray();
+        return CreateInstance(MakeInstanceType(0, array), 0, array);
     }
+
+    public static T CreateInstance<T>(params Object?[] values) =>
+        (T)CreateInstance(typeof(T), 0, (Object?[])values.Clone());
+
+    public static T CreateInstance<T>(IEnumerable<Object?> values) =>
+        (T)CreateInstance(typeof(T), 0, values.ToArray());
+
+    internal static object CreateInstance(Type type, int offset, Object?[] values)
+    {
+        Debug.Assert(offset >= 0);
+        if (type == typeof(MultiReturns)) return new MultiReturns(offset, values);
+        else if (type.IsGenericType)
+        {
+            var count = values.Length;
+            var typeDef = type.GetGenericTypeDefinition();
+            var typeArgs = type.GenericTypeArguments;
+            object? rObj = null;
+            if (typeDef == typeof(MultiReturns<>))
+            {
+                var arg1 = getArg(0);
+                rObj = Activator.CreateInstance(type, arg1);
+            }
+            else if (typeDef == typeof(MultiReturns<,>))
+            {
+                var arg1 = getArg(0);
+                var arg2 = getArg(1);
+                rObj = Activator.CreateInstance(type, arg1, arg2);
+            }
+            else if (typeDef == typeof(MultiReturns<,,>))
+            {
+                var arg1 = getArg(0);
+                var arg2 = getArg(1);
+                var arg3 = getArg(2);
+                rObj = Activator.CreateInstance(type, arg1, arg2, arg3);
+            }
+            else if (typeDef == typeof(MultiReturns<,,,>))
+            {
+                var arg1 = getArg(0);
+                var arg2 = getArg(1);
+                var arg3 = getArg(2);
+                var arg4 = getArg(3);
+                rObj = Activator.CreateInstance(type, arg1, arg2, arg3, arg4);
+            }
+            else if (typeDef == typeof(MultiReturns<,,,,>))
+            {
+                var arg1 = getArg(0);
+                var arg2 = getArg(1);
+                var arg3 = getArg(2);
+                var arg4 = getArg(3);
+                var arg5 = getArg(4);
+                rObj = Activator.CreateInstance(type, arg1, arg2, arg3, arg4, arg5);
+            }
+            else if (typeDef == typeof(MultiReturns<,,,,,>))
+            {
+                var arg1 = getArg(0);
+                var arg2 = getArg(1);
+                var arg3 = getArg(2);
+                var arg4 = getArg(3);
+                var arg5 = getArg(4);
+                var arg6 = getArg(5);
+                rObj = Activator.CreateInstance(type, arg1, arg2, arg3, arg4, arg5, arg6);
+            }
+            else if (typeDef == typeof(MultiReturns<,,,,,,>))
+            {
+                var arg1 = getArg(0);
+                var arg2 = getArg(1);
+                var arg3 = getArg(2);
+                var arg4 = getArg(3);
+                var arg5 = getArg(4);
+                var arg6 = getArg(5);
+                var arg7 = getArg(6);
+                rObj = Activator.CreateInstance(type, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+            }
+            else if (typeDef == typeof(MultiReturns<,,,,,,,>))
+            {
+                var arg1 = getArg(0);
+                var arg2 = getArg(1);
+                var arg3 = getArg(2);
+                var arg4 = getArg(3);
+                var arg5 = getArg(4);
+                var arg6 = getArg(5);
+                var arg7 = getArg(6);
+
+                var i = 7 + offset;
+                var rest = CreateInstance(typeArgs[i], i, values);
+                rObj = Activator.CreateInstance(type, arg1, arg2, arg3, arg4, arg5, arg6, arg7, rest);
+            }
+
+            if (rObj is not null) return rObj;
+
+            Object? getArg(int index)
+            {
+                var i = index + offset;
+                if (i >= count) return null;
+
+                var v = values[i];
+                if (v is null) return null;
+                else if (typeArgs[index].IsAssignableFrom(v.GetType())) return v;
+                else return null;
+            }
+        }
+
+        throw new InvalidCastException($"类型“{type.FullName}”不是受支持的多返回值类型。");
+    }
+
+    internal static Type MakeInstanceType(int offset, Object?[] values)
+    {
+        var count = values.Length - offset;
+        Debug.Assert(count > 0);
+
+        var vTypes = values.Select(static v => v?.GetPrimitiveType() ?? typeof(Object)).ToArray();
+        var typeArgs = offset == 0 ? vTypes : vTypes.Skip(offset).ToArray();
+        if (count < 8)
+            return (count switch
+            {
+                1 => typeof(MultiReturns<>),
+                2 => typeof(MultiReturns<,>),
+                3 => typeof(MultiReturns<,,>),
+                4 => typeof(MultiReturns<,,,>),
+                5 => typeof(MultiReturns<,,,,>),
+                6 => typeof(MultiReturns<,,,,,>),
+                7 => typeof(MultiReturns<,,,,,,>),
+                _ => throw new InvalidOperationException(),
+            }).MakeGenericType(typeArgs);
+        else
+            return typeof(MultiReturns<,,,,,,,>).MakeGenericType(
+                typeArgs[0 + offset],
+                typeArgs[1 + offset],
+                typeArgs[2 + offset],
+                typeArgs[3 + offset],
+                typeArgs[4 + offset],
+                typeArgs[5 + offset],
+                typeArgs[6 + offset],
+                MakeInstanceType(7 + offset, values));
+    }
+
 }

@@ -44,7 +44,19 @@ public class NumberTests : PrimitiveTestBase
             {
                 var bytes = new byte[8];
                 s_random.NextBytes(bytes);
-                yield return (Number)(decimal)BitConverter.ToDouble(bytes, 0);
+                var d = BitConverter.ToDouble(bytes, 0);
+                if (double.IsNaN(d))
+                    yield return decimal.Zero;
+                else if (double.IsPositiveInfinity(d))
+                    yield return decimal.MaxValue;
+                else if (double.IsNegativeInfinity(d))
+                    yield return decimal.MinValue;
+                else if (d > (double)decimal.MaxValue)
+                    yield return (Number)decimal.MaxValue;
+                else if (d < (double)decimal.MinValue)
+                    yield return (Number)decimal.MinValue;
+                else
+                    yield return (Number)(decimal)d;
             }
         }
     }
