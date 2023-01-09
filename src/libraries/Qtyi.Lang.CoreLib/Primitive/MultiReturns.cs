@@ -242,9 +242,7 @@ public readonly struct MultiReturns : IMultiReturns
                 var arg5 = getArg(4);
                 var arg6 = getArg(5);
                 var arg7 = getArg(6);
-
-                var i = 7 + offset;
-                var rest = CreateInstance(typeArgs[i], i, values);
+                var rest = CreateInstance(typeArgs[7], 7 + offset, values);
                 rObj = Activator.CreateInstance(type, arg1, arg2, arg3, arg4, arg5, arg6, arg7, rest);
             }
 
@@ -270,8 +268,7 @@ public readonly struct MultiReturns : IMultiReturns
         var count = values.Length - offset;
         Debug.Assert(count > 0);
 
-        var vTypes = values.Select(static v => v?.GetPrimitiveType() ?? typeof(Object)).ToArray();
-        var typeArgs = offset == 0 ? vTypes : vTypes.Skip(offset).ToArray();
+        var typeArgs = values.Skip(offset).Select(static v => v?.GetPrimitiveType() ?? typeof(Object)).ToArray();
         if (count < 8)
             return (count switch
             {
@@ -286,13 +283,13 @@ public readonly struct MultiReturns : IMultiReturns
             }).MakeGenericType(typeArgs);
         else
             return typeof(MultiReturns<,,,,,,,>).MakeGenericType(
-                typeArgs[0 + offset],
-                typeArgs[1 + offset],
-                typeArgs[2 + offset],
-                typeArgs[3 + offset],
-                typeArgs[4 + offset],
-                typeArgs[5 + offset],
-                typeArgs[6 + offset],
+                typeArgs[0],
+                typeArgs[1],
+                typeArgs[2],
+                typeArgs[3],
+                typeArgs[4],
+                typeArgs[5],
+                typeArgs[6],
                 MakeInstanceType(7 + offset, values));
     }
 

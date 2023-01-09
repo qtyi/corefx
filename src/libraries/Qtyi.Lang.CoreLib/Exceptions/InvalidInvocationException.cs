@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace Qtyi.Runtime;
 
-public class InvalidInvocationException : LuaException
+public class InvalidInvocationException : Exception
 {
     public InvalidInvocationException() { }
 
@@ -20,7 +20,7 @@ public class InvalidInvocationException : LuaException
 
     public InvalidInvocationException(string? message) : base(message) { }
 
-    public InvalidInvocationException(string? message, Exception? innerException) : base(message, innerException) { }
+    public InvalidInvocationException(string? message, System.Exception? innerException) : base(message, innerException) { }
 
     protected InvalidInvocationException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 }

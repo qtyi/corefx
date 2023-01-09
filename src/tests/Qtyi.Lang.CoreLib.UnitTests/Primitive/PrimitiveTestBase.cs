@@ -43,7 +43,7 @@ public abstract class PrimitiveTestBase
 
         if (length == 0) return;
 
-        var objects = GetRandomObjects().ToArray();
+        var objects = GetRandomObjects(count: 1).ToArray();
         var count = objects.Length;
         for (var offset = 0; offset < length; offset++)
             buffer[index + offset] = objects[s_random.Next(count)];
@@ -54,4 +54,24 @@ public abstract class PrimitiveTestBase
         NumberTests.GetRandomNumbers(count).Cast<Object>()
     }.ConcatAll<Object, IEnumerable<Object>>();
 
+    /// <summary>
+    /// 产生随机的<see cref="Object"/>的数组的测试数据。
+    /// </summary>
+    /// <param name="count">测试数据的组数。</param>
+    /// <param name="min">数组长度最小值。</param>
+    /// <param name="max">数组长度最大值。</param>
+    public static IEnumerable<object[]> RandomObjectArray(int count, int min, int max)
+    {
+        if (count == 0) yield break;
+
+        Debug.Assert(min >= 0);
+        Debug.Assert(max >= min);
+
+        for (int i = 0, maxi = count; i < maxi; i++)
+        {
+            var buffer = new Object[s_random.Next(min, max + 1)];
+            GetRandomObjects(buffer);
+            yield return new object[] { buffer };
+        }
+    }
 }

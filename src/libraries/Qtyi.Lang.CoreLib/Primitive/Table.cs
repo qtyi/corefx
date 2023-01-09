@@ -58,7 +58,7 @@ public class Table : Object
         {
             var mvMetatable = Table.RawGet(metatable, Qtyi.Runtime.Metatable.Metavalue_Metatable);
             if (mvMetatable is not null)
-                throw new LuaException(mvMetatable);
+                throw new Exception(mvMetatable);
         }
 
         this.mt = table;
@@ -121,7 +121,7 @@ public class Table : Object
         else throw new InvalidCastException();
     }
 
-    public static Object? Next(Table table, Object? index = null)
+    public static MultiReturns<Object> Next(Table table, Object? index = null)
     {
         if (table is null) throw new ArgumentNullException(nameof(table));
 
@@ -129,9 +129,9 @@ public class Table : Object
         if (index is null)
         {
             if (etor.MoveNext())
-                return etor.Current;
+                return new(etor.Current);
             else
-                return null;
+                return MultiReturns<Object>.Empty;
         }
 
         var comparer = table.dictionary.Comparer;
@@ -140,43 +140,32 @@ public class Table : Object
             if (comparer.Equals(etor.Current, index))
             {
                 if (etor.MoveNext())
-                    return etor.Current;
+                    return new(etor.Current);
                 else
-                    return null;
+                    return MultiReturns<Object>.Empty;
             }
         }
 
-        return null;
+        return MultiReturns<Object>.Empty;
     }
 
-    [return: Tuple(3)]
-    [return:
-        TupleItemType(0, typeof(Function)),
-        TupleItemTypeSameAs(1, nameof(t)),
-        TupleItemType(2, typeof(long))
-    ]
-    public static MultiReturns IndexedPair(Table t)
+    public static MultiReturns<Function, Table, Number> IndexedPair(Table t)
     {
         if (t is null) throw new ArgumentNullException(nameof(t));
 
         return new(
-            (Function)new Func<Table, long, long>((_, i) => i++),
+            new Func<Table, Number, MultiReturns<Number>>((_, i) => new(i++)),
             t,
-            (Number)0L
+            0L
         );
     }
 
-    [return: Tuple(2)]
-    [return:
-        TupleItemType(0, typeof(Func<Table, Object?, Object?>)),
-        TupleItemTypeSameAs(1, nameof(t))
-    ]
-    public static MultiReturns Pair(Table t)
+    public static MultiReturns<Function, Table> Pair(Table t)
     {
         if (t is null) throw new ArgumentNullException(nameof(t));
 
         return new(
-            (Function)new Func<Table, Object?, Object?>(Table.Next),
+            new Func<Table, Object?, MultiReturns<Object>>(Table.Next),
             t
         );
     }

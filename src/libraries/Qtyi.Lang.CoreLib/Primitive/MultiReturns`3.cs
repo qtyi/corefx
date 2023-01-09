@@ -15,6 +15,8 @@ public readonly struct MultiReturns<T1, T2, T3> : IMultiReturns
 {
     private readonly MultiReturns _values;
 
+    public static MultiReturns<T1, T2, T3> Empty => new(null, null, null);
+
     public Object? this[int index] => this._values[index];
 
     public int Count => this._values.Count;
@@ -53,5 +55,11 @@ public readonly struct MultiReturns<T1, T2, T3> : IMultiReturns
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     #endregion
 
+    #region 操作符
     public static implicit operator MultiReturns(MultiReturns<T1, T2, T3> values) => values._values;
+    public static explicit operator MultiReturns<T1>(MultiReturns<T1, T2, T3> values) => new(values.Value1);
+    public static implicit operator MultiReturns<T1, T2, T3>(MultiReturns<T1> values) => new(values.Value1, null, null);
+    public static explicit operator MultiReturns<T1, T2>(MultiReturns<T1, T2, T3> values) => new(values.Value1, values.Value2);
+    public static implicit operator MultiReturns<T1, T2, T3>(MultiReturns<T1, T2> values) => new(values.Value1, values.Value2, null);
+    #endregion
 }

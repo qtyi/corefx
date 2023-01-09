@@ -97,7 +97,7 @@ public sealed class TypeInfo : Object, IEquatable<TypeInfo>, IEquatable<String>,
 
     public override TypeInfo GetTypeInfo() => TypeInfo.String;
 
-    public override MultiReturns Invoke(params Object?[] args) => ((String)this).Invoke(args);
+    protected override MultiReturns InvokeCore(params Object?[] args) => ((String)this).Invoke(args);
     #endregion
 
     public override bool Equals(object? obj) => obj switch

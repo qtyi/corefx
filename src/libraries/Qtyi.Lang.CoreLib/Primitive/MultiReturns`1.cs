@@ -13,6 +13,8 @@ public readonly struct MultiReturns<T1> : IMultiReturns
 {
     private readonly MultiReturns _values;
 
+    public static MultiReturns<T1> Empty => new(null);
+
     public Object? this[int index] => this._values[index];
 
     public int Count => this._values.Count;

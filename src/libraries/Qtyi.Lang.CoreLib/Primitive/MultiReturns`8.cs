@@ -22,6 +22,8 @@ public readonly struct MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest> : IMultiR
     private readonly MultiReturns _values;
     private readonly TRest _rest;
 
+    public static MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest> Empty => new(null, null, null, null, null, null, null);
+
     public Object? this[int index] => this._values[index];
 
     public int Count => this._values.Count;
@@ -137,5 +139,21 @@ public readonly struct MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest> : IMultiR
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
     #endregion
 
+    #region 操作符
     public static implicit operator MultiReturns(MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest> values) => values._values;
+    public static explicit operator MultiReturns<T1>(MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest> values) => new(values.Value1);
+    public static implicit operator MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest>(MultiReturns<T1> values) => new(values.Value1, null, null, null, null, null, null);
+    public static explicit operator MultiReturns<T1, T2>(MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest> values) => new(values.Value1, values.Value2);
+    public static implicit operator MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest>(MultiReturns<T1, T2> values) => new(values.Value1, values.Value2, null, null, null, null, null);
+    public static explicit operator MultiReturns<T1, T2, T3>(MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest> values) => new(values.Value1, values.Value2, values.Value3);
+    public static implicit operator MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest>(MultiReturns<T1, T2, T3> values) => new(values.Value1, values.Value2, values.Value3, null, null, null, null);
+    public static explicit operator MultiReturns<T1, T2, T3, T4>(MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest> values) => new(values.Value1, values.Value2, values.Value3, values.Value4);
+    public static implicit operator MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest>(MultiReturns<T1, T2, T3, T4> values) => new(values.Value1, values.Value2, values.Value3, values.Value4, null, null, null);
+    public static explicit operator MultiReturns<T1, T2, T3, T4, T5>(MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest> values) => new(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5);
+    public static implicit operator MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest>(MultiReturns<T1, T2, T3, T4, T5> values) => new(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5, null, null);
+    public static explicit operator MultiReturns<T1, T2, T3, T4, T5, T6>(MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest> values) => new(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5, values.Value6);
+    public static implicit operator MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest>(MultiReturns<T1, T2, T3, T4, T5, T6> values) => new(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5, values.Value6, null);
+    public static explicit operator MultiReturns<T1, T2, T3, T4, T5, T6, T7>(MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest> values) => new(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5, values.Value6, values.Value7);
+    public static implicit operator MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest>(MultiReturns<T1, T2, T3, T4, T5, T6, T7> values) => new(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5, values.Value6, values.Value7);
+    #endregion
 }

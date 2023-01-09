@@ -13,7 +13,7 @@ public sealed class Function : Object
 
     public Function(Delegate func) => this._func = func ?? throw new ArgumentNullException(nameof(func));
 
-    public override MultiReturns Invoke(params Object?[] args)
+    protected override MultiReturns InvokeCore(params Object?[] args)
     {
         var mi = this._func.Method;
         bool hasReturnValue = mi.ReturnType == typeof(void);

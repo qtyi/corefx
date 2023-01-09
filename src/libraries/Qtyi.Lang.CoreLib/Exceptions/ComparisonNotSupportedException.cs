@@ -14,7 +14,7 @@ public class ComparisonNotSupportedException : Exception
 
     public ComparisonNotSupportedException(string? message) : base(message) { }
 
-    public ComparisonNotSupportedException(string? message, Exception? innerException) : base(message, innerException) { }
+    public ComparisonNotSupportedException(string? message, System.Exception? innerException) : base(message, innerException) { }
 
     protected ComparisonNotSupportedException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 }

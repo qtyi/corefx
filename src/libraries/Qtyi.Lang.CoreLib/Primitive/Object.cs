@@ -124,7 +124,9 @@ public abstract partial class Object : IDynamicMetaObjectProvider
     /// </summary>
     /// <param name="args">传入的参数。</param>
     /// <returns>调用的返回值。</returns>
-    public virtual MultiReturns Invoke(params Object?[] args)
+    public MultiReturns Invoke(params Object?[] args) => this.InvokeCore(args);
+
+    protected virtual MultiReturns InvokeCore(params Object?[] args)
     {
         var mvCall = this.GetMetavalue(Qtyi.Runtime.Metatable.Metavalue_CallOperation);
 
