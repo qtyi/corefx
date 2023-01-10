@@ -119,6 +119,8 @@ public abstract partial class Object : IDynamicMetaObjectProvider
 
     public abstract TypeInfo GetTypeInfo();
 
+    public static TypeInfo GetTypeInfo(Object? obj) => obj?.GetTypeInfo() ?? TypeInfo.TypeInfo_Nil;
+
     /// <summary>
     /// 调用此示例。
     /// </summary>

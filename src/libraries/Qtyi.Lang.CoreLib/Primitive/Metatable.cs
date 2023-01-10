@@ -28,5 +28,6 @@ public static class Metatable
     public const string Metavalue_LessEqualOperation = "__le";
     public const string Metavalue_IndexingAccessOperation = "__index";
     public const string Metavalue_IndexingAssignOperation = "__newindex";
+    public const string Metavalue_IterateOperation = "__pair";
     public const string Metavalue_CallOperation = "__call";
 }

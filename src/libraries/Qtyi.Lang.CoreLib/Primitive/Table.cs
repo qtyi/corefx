@@ -11,7 +11,8 @@ namespace Qtyi.Runtime;
 public class Table : Object
 {
     protected internal Table? mt;
-    protected internal readonly Dictionary<Object, Object?> dictionary = new();
+    protected internal readonly Dictionary<Object, LinkedListNode<Object?>> dictionary = new();
+    protected internal readonly LinkedList<Object?> order = new();
 
     public override Object? this[Object? key]
     {
@@ -78,8 +79,8 @@ public class Table : Object
         if (table is null) throw new ArgumentNullException(nameof(table));
         if (index is null) throw new ArgumentNullException(nameof(index));
 
-        if (table.dictionary.TryGetValue(index, out var value))
-            return value;
+        if (table.dictionary.TryGetValue(index, out var valueNode))
+            return valueNode.Value;
         else
             return null;
     }
@@ -98,18 +99,32 @@ public class Table : Object
 
         if (table.dictionary.ContainsKey(index))
         {
+            var valueNode = table.dictionary[index];
             if (value is null)
+            {
                 table.dictionary.Remove(index);
+                table.order.Remove(valueNode);
+            }
             else
-                table.dictionary[index] = value;
+                valueNode.Value = value;
         }
         else
-            table.dictionary.Add(index, value);
+        {
+            var valueNode = table.order.AddLast(value);
+            table.dictionary.Add(index, valueNode);
+        }
 
         return table;
     }
 
-    public override int GetHashCode() => this.dictionary.GetHashCode();
+    public override int GetHashCode()
+    {
+        var hashCode = 0;
+        if (this.mt is not null)
+            hashCode = HashCode.Combine(hashCode, this.mt.GetHashCode());
+        hashCode = HashCode.Combine(hashCode, this.dictionary.GetHashCode());
+        return hashCode;
+    }
 
     public override TypeInfo GetTypeInfo() => TypeInfo.Table;
 
@@ -121,32 +136,26 @@ public class Table : Object
         else throw new InvalidCastException();
     }
 
-    public static MultiReturns<Object> Next(Table table, Object? index = null)
+    public static MultiReturns<Object, Object> Next(Table table, Object? index = null)
     {
         if (table is null) throw new ArgumentNullException(nameof(table));
 
-        var etor = table.dictionary.Keys.GetEnumerator();
         if (index is null)
-        {
-            if (etor.MoveNext())
-                return new(etor.Current);
-            else
-                return MultiReturns<Object>.Empty;
-        }
+            return FromNode(table.order.First);
 
-        var comparer = table.dictionary.Comparer;
-        while (etor.MoveNext())
-        {
-            if (comparer.Equals(etor.Current, index))
-            {
-                if (etor.MoveNext())
-                    return new(etor.Current);
-                else
-                    return MultiReturns<Object>.Empty;
-            }
-        }
+        if (table.dictionary.TryGetValue(index, out var valueNode))
+            return FromNode(valueNode.Next);
 
-        return MultiReturns<Object>.Empty;
+        throw new Exception("invalid key to 'next'");
+
+        [DebuggerStepThrough]
+        MultiReturns<Object, Object> FromNode(LinkedListNode<Object?>? node)
+        {
+            if (node is null) return MultiReturns<Object, Object>.Empty;
+
+            var value = table.dictionary.Single(pair => object.ReferenceEquals(pair.Value, node)).Key;
+            return new(value, node.Value);
+        }
     }
 
     public static MultiReturns<Function, Table, Number> IndexedPair(Table t)
@@ -160,13 +169,18 @@ public class Table : Object
         );
     }
 
-    public static MultiReturns<Function, Table> Pair(Table t)
+    public static MultiReturns Pair(Table t)
     {
         if (t is null) throw new ArgumentNullException(nameof(t));
 
-        return new(
-            new Func<Table, Object?, MultiReturns<Object>>(Table.Next),
-            t
-        );
+        var mvPairs = t.GetMetavalue(Qtyi.Runtime.Metatable.Metavalue_IterateOperation);
+        if (mvPairs is null || !mvPairs.IsCallable)
+            return new(
+                (Function)new Func<Table, Object?, MultiReturns<Object, Object>>(Table.Next),
+                t,
+                null
+            );
+
+        return mvPairs.Invoke(t);
     }
 }

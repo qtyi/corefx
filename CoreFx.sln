@@ -7,6 +7,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Qtyi.Lang.CoreLib", "src\li
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Qtyi.Lang.CoreLib.UnitTests", "src\tests\Qtyi.Lang.CoreLib.UnitTests\Qtyi.Lang.CoreLib.UnitTests.csproj", "{B37B85CA-EC0D-48F6-9B61-1743D5E2DEC4}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers", "Analyzers", "{6E406794-5F8E-4188-81FA-4877BFFC573A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Qtyi.Lang.CodeStyle", "src\analyzers\Qtyi.Lang.CodeStyle\Qtyi.Lang.CodeStyle.csproj", "{3F64B9E4-919C-457F-BDCE-3695CA84D979}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,9 +25,16 @@ Global
 		{B37B85CA-EC0D-48F6-9B61-1743D5E2DEC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B37B85CA-EC0D-48F6-9B61-1743D5E2DEC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B37B85CA-EC0D-48F6-9B61-1743D5E2DEC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F64B9E4-919C-457F-BDCE-3695CA84D979}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F64B9E4-919C-457F-BDCE-3695CA84D979}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F64B9E4-919C-457F-BDCE-3695CA84D979}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F64B9E4-919C-457F-BDCE-3695CA84D979}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3F64B9E4-919C-457F-BDCE-3695CA84D979} = {6E406794-5F8E-4188-81FA-4877BFFC573A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D7F6A672-6B94-4EA7-A0F9-405A4489D46E}
