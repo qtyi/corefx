@@ -7,12 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.1.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="4.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\libraries\Qtyi.Lang.CoreLib\Qtyi.Lang.CoreLib.csproj" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0-2.final" />
+    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="4.5.0-2.final" />
   </ItemGroup>
 
 </Project>

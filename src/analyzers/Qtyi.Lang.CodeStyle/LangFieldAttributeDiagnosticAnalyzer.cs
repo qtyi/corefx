@@ -3,27 +3,22 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
+using System.Linq;
+using System.Reflection;
+using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
-using CSharpSyntaxKind = Microsoft.CodeAnalysis.CSharp.SyntaxKind;
-using VisualBasicSyntaxKind = Microsoft.CodeAnalysis.VisualBasic.SyntaxKind;
+using Microsoft.CodeAnalysis.Operations;
+using CS = Microsoft.CodeAnalysis.CSharp;
+using VB = Microsoft.CodeAnalysis.VisualBasic;
 
 namespace Qtyi.CodeAnalysis;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp, LanguageNames.VisualBasic)]
 public class LangFieldAttributeDiagnosticAnalyzer : DiagnosticAnalyzer
 {
-    private static readonly DiagnosticDescriptor s_MissingAttributeUsageAttribute = new(
-        "QTYI1001",
-        title: $"缺失“{typeof(AttributeUsageAttribute).FullName}”",
-        messageFormat: $"必须指定“{typeof(AttributeUsageAttribute).FullName}”。",
-        category: "设计",
-        defaultSeverity: DiagnosticSeverity.Error,
-        isEnabledByDefault: true);
-
     private static readonly DiagnosticDescriptor s_UnexpectedAttributeTargets = new(
-        "QTYI1002",
+        "QTYI1001",
         title: $"错误的“{typeof(AttributeTargets).FullName}”",
         messageFormat: "{0}的子类型的AttributeTargets不应在{1}之外。",
         category: "设计",
@@ -31,64 +26,61 @@ public class LangFieldAttributeDiagnosticAnalyzer : DiagnosticAnalyzer
         isEnabledByDefault: true);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(
-        s_MissingAttributeUsageAttribute,
         s_UnexpectedAttributeTargets
     );
 
     public override void Initialize(AnalysisContext context)
     {
+#if false
+        if (!System.Diagnostics.Debugger.IsAttached)
+        {
+            System.Diagnostics.Debugger.Launch();
+        }
+#endif
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
         context.EnableConcurrentExecution();
-        context.RegisterSyntaxNodeAction(AnalyzeNode, CSharpSyntaxKind.ClassDeclaration);
-        context.RegisterSyntaxNodeAction(AnalyzeNode, VisualBasicSyntaxKind.ClassBlock);
+        context.RegisterOperationAction(AnalyzeAttributeOperation, OperationKind.Attribute);
     }
 
-    private void AnalyzeNode(SyntaxNodeAnalysisContext context)
+    private void AnalyzeAttributeOperation(OperationAnalysisContext context)
     {
-        var node = context.Node;
-        var model = context.SemanticModel;
-        if (model.GetDeclaredSymbol(node) is not INamedTypeSymbol symbol) return;
+        var aOp = (IAttributeOperation)context.Operation;
+        if (context.ContainingSymbol is not INamedTypeSymbol symbol) return;
 
-        // 测试是否继承自System.Runtime.CompilerServices.LangFieldAttribute或System.Runtime.CompilerServices.LangFieldMappingAttribute。
+        // 检查是否继承自特定的一些特性类型。
+        var compilation = context.Compilation;
         var baseAttributeTypeSymbols = new[]
         {
-            model.Compilation.GetTypeByMetadataName(typeof(LangFieldAttribute).FullName),
-            model.Compilation.GetTypeByMetadataName(typeof(LangFieldMappingAttribute).FullName)
+            compilation.GetTypeByMetadataName("System.Runtime.CompilerServices.LangFieldAttribute"),
+            compilation.GetTypeByMetadataName("System.Runtime.CompilerServices.LangFieldIgnoreAttribute")
         };
         INamedTypeSymbol? baseAttributeTypeSymbol;
-        for (baseAttributeTypeSymbol = symbol; ; baseAttributeTypeSymbol = symbol.BaseType)
+        for (baseAttributeTypeSymbol = symbol; ; baseAttributeTypeSymbol = baseAttributeTypeSymbol.BaseType)
         {
             if (baseAttributeTypeSymbol is null) return;
             else if (baseAttributeTypeSymbols.Contains(baseAttributeTypeSymbol)) break;
         }
 
-        var System_AttributeUsageAttribute_TypeSymbol = model.Compilation.GetTypeByMetadataName(typeof(AttributeUsageAttribute).FullName);
-        var attrDatas = symbol.GetAttributes().Where(data => data.AttributeClass == System_AttributeUsageAttribute_TypeSymbol).ToArray();
-        if (attrDatas.Length == 0)
+        var System_AttributeUsageAttribute_TypeSymbol = compilation.GetTypeByMetadataName(typeof(AttributeUsageAttribute).FullName);
+
+        // 检查第一个参数（validOn）是否含有值。
+        if (aOp.Operation is not IObjectCreationOperation ocOp) return;
+        if (ocOp.Constructor?.ContainingSymbol != System_AttributeUsageAttribute_TypeSymbol) return;
+        var args = ocOp.Arguments;
+        if (args.Length == 0) return;
+        var arg1 = args[0].Value;
+        var value1 = arg1.ConstantValue;
+        if (!value1.HasValue || value1.Value is null || value1.Value.GetType() != Enum.GetUnderlyingType(typeof(AttributeTargets))) return;
+
+        // validOn中的各个标志不能在特定基类规定的应用位置范围之外。
+        var validOn = (AttributeTargets)value1.Value;
+        var expectedTargets = (AttributeTargets)baseAttributeTypeSymbol.GetAttributes().SingleOrDefault(data => data.AttributeClass == System_AttributeUsageAttribute_TypeSymbol)!.ConstructorArguments[0].Value!;
+        if ((validOn & ~expectedTargets) != 0)
         {
             context.ReportDiagnostic(Diagnostic.Create(
-                s_MissingAttributeUsageAttribute,
-                location: node.GetLocation(),
-                additionalLocations: symbol.Locations));
-        }
-        else
-        {
-            var expectedTargets = (AttributeTargets?)baseAttributeTypeSymbol.GetAttributes().SingleOrDefault(data => data.AttributeClass == System_AttributeUsageAttribute_TypeSymbol)?.ConstructorArguments[0].Value ?? default;
-            var data = attrDatas[0]; // 只检查第一个。
-
-            if (data.ConstructorArguments.Length == 0) return; // 错误的构造函数参数。
-
-            var arg1 = data.ConstructorArguments[0].Value;
-            if (arg1 is null || arg1 is not AttributeTargets validOn) return; // 错误的构造函数参数。
-
-            if ((validOn & ~expectedTargets) != 0)
-            {
-                context.ReportDiagnostic(Diagnostic.Create(
-                    s_UnexpectedAttributeTargets,
-                    location: node.GetLocation(),
-                    additionalLocations: symbol.Locations,
-                    baseAttributeTypeSymbol.Name, Enum.Format(typeof(AttributeTargets), expectedTargets, "F")));
-            }
+                s_UnexpectedAttributeTargets,
+                location: arg1.Syntax.GetLocation(),
+                baseAttributeTypeSymbol.Name, Enum.Format(typeof(AttributeTargets), expectedTargets, "F")));
         }
     }
 }
