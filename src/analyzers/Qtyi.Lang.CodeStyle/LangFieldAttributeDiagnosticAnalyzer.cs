@@ -3,24 +3,19 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Immutable;
-using System.Linq;
-using System.Reflection;
-using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
-using CS = Microsoft.CodeAnalysis.CSharp;
-using VB = Microsoft.CodeAnalysis.VisualBasic;
 
 namespace Qtyi.CodeAnalysis;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp, LanguageNames.VisualBasic)]
-public class LangFieldAttributeDiagnosticAnalyzer : DiagnosticAnalyzer
+public sealed class LangFieldAttributeDiagnosticAnalyzer : DiagnosticAnalyzer
 {
-    private static readonly DiagnosticDescriptor s_UnexpectedAttributeTargets = new(
+    internal static readonly DiagnosticDescriptor s_UnexpectedAttributeTargets = new(
         "QTYI1001",
-        title: $"错误的“{typeof(AttributeTargets).FullName}”",
-        messageFormat: "{0}的子类型的AttributeTargets不应在{1}之外。",
+        title: $"错误的“{nameof(AttributeTargets)}”",
+        messageFormat: $"{{0}}的子类型的“{nameof(AttributeTargets)}”不应在{{1}}之外。",
         category: "设计",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
@@ -32,9 +27,9 @@ public class LangFieldAttributeDiagnosticAnalyzer : DiagnosticAnalyzer
     public override void Initialize(AnalysisContext context)
     {
 #if false
-        if (!System.Diagnostics.Debugger.IsAttached)
+        if (!Debugger.IsAttached)
         {
-            System.Diagnostics.Debugger.Launch();
+            Debugger.Launch();
         }
 #endif
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
@@ -44,8 +39,12 @@ public class LangFieldAttributeDiagnosticAnalyzer : DiagnosticAnalyzer
 
     private void AnalyzeAttributeOperation(OperationAnalysisContext context)
     {
+        var cancellationToken = context.CancellationToken;
+
         var aOp = (IAttributeOperation)context.Operation;
         if (context.ContainingSymbol is not INamedTypeSymbol symbol) return;
+
+        if (cancellationToken.IsCancellationRequested) return;
 
         // 检查是否继承自特定的一些特性类型。
         var compilation = context.Compilation;
@@ -61,6 +60,8 @@ public class LangFieldAttributeDiagnosticAnalyzer : DiagnosticAnalyzer
             else if (baseAttributeTypeSymbols.Contains(baseAttributeTypeSymbol)) break;
         }
 
+        if (cancellationToken.IsCancellationRequested) return;
+
         var System_AttributeUsageAttribute_TypeSymbol = compilation.GetTypeByMetadataName(typeof(AttributeUsageAttribute).FullName);
 
         // 检查第一个参数（validOn）是否含有值。
@@ -72,15 +73,89 @@ public class LangFieldAttributeDiagnosticAnalyzer : DiagnosticAnalyzer
         var value1 = arg1.ConstantValue;
         if (!value1.HasValue || value1.Value is null || value1.Value.GetType() != Enum.GetUnderlyingType(typeof(AttributeTargets))) return;
 
+        if (cancellationToken.IsCancellationRequested) return;
+
         // validOn中的各个标志不能在特定基类规定的应用位置范围之外。
         var validOn = (AttributeTargets)value1.Value;
-        var expectedTargets = (AttributeTargets)baseAttributeTypeSymbol.GetAttributes().SingleOrDefault(data => data.AttributeClass == System_AttributeUsageAttribute_TypeSymbol)!.ConstructorArguments[0].Value!;
+        var baseAttributeUsageAttributeData = baseAttributeTypeSymbol.GetAttributes().Single(data => data.AttributeClass == System_AttributeUsageAttribute_TypeSymbol);
+        var expectedTargets = (AttributeTargets)baseAttributeUsageAttributeData.ConstructorArguments[0].Value!;
         if ((validOn & ~expectedTargets) != 0)
         {
+            if (cancellationToken.IsCancellationRequested) return;
+
+            bool elseInherited;
+            var initializer = ocOp.Initializer;
+            if (initializer is null) elseInherited = false;
+            else
+            {
+                elseInherited = true;
+                var baseAttributeUsageAttributeNamedArguments = baseAttributeUsageAttributeData.NamedArguments.ToImmutableDictionary();
+                foreach (var assignOp in initializer.Initializers.OfType<ISimpleAssignmentOperation>())
+                {
+                    if (cancellationToken.IsCancellationRequested) return;
+
+                    if (assignOp.Target is not IPropertyReferenceOperation prop) continue;
+                    var constValue = assignOp.Value.ConstantValue;
+                    if (!constValue.HasValue) continue;
+
+                    var value = constValue.Value;
+                    var propName = prop.Property.Name;
+                    var baseValue = baseAttributeUsageAttributeNamedArguments.TryGetValue(propName, out var typedConstant) ? typedConstant.Value :
+                        propName switch
+                        {
+                            nameof(AttributeUsageAttribute.AllowMultiple) => false,
+                            nameof(AttributeUsageAttribute.Inherited) => true,
+                            _ => null
+                        };
+                    if (value != baseValue)
+                    {
+                        elseInherited = false;
+                        break;
+                    }
+                }
+            }
+
+            if (cancellationToken.IsCancellationRequested) return;
+
             context.ReportDiagnostic(Diagnostic.Create(
                 s_UnexpectedAttributeTargets,
                 location: arg1.Syntax.GetLocation(),
+                properties: CreateProperties(expectedTargets, validOn, elseInherited),
                 baseAttributeTypeSymbol.Name, Enum.Format(typeof(AttributeTargets), expectedTargets, "F")));
         }
+    }
+
+    internal static ImmutableDictionary<string, string?> CreateProperties(
+        AttributeTargets expectedTargets,
+        AttributeTargets actualTargets,
+        bool elseInherited)
+    {
+        var builder = ImmutableDictionary.CreateBuilder<string, string?>();
+
+        builder.Add("Expected", Enum.Format(typeof(AttributeTargets), expectedTargets, "D"));
+        builder.Add("Actual", Enum.Format(typeof(AttributeTargets), actualTargets, "D"));
+        builder.Add("ElseInherited", elseInherited.ToString());
+
+        return builder.ToImmutable();
+    }
+
+    internal static bool TryGetProperties(ImmutableDictionary<string, string?> properties,
+        out AttributeTargets expectedTargets,
+        out AttributeTargets actualTargets,
+        out bool elseInherited)
+    {
+        var result = false;
+        expectedTargets = default;
+        actualTargets = default;
+        elseInherited = default;
+
+        result &= properties.TryGetValue("Expected", out var propExpectedTargets) && propExpectedTargets is not null &&
+            Enum.TryParse(propExpectedTargets, out expectedTargets);
+        result &= properties.TryGetValue("Actual", out var propActualTargets) && propActualTargets is not null &&
+            Enum.TryParse(propActualTargets, out actualTargets);
+        result &= properties.TryGetValue("ElseInherited", out var propElseInherited) && propElseInherited is not null &&
+            bool.TryParse(propElseInherited, out elseInherited);
+
+        return result;
     }
 }

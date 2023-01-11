@@ -19,14 +19,14 @@ partial class Object
 
         public override DynamicMetaObject BindGetIndex(GetIndexBinder binder, DynamicMetaObject[] indexes)
         {
-            if (indexes.Length > 1) throw new ArgumentException("Multi-index not supported.", nameof(indexes));
+            if (indexes.Length > 1) throw new System.ArgumentException("Multi-index not supported.", nameof(indexes));
 
             return this.BindGetValueByKey(indexes[0].Expression);
         }
 
         public override DynamicMetaObject BindSetIndex(SetIndexBinder binder, DynamicMetaObject[] indexes, DynamicMetaObject value)
         {
-            if (indexes.Length > 1) throw new ArgumentException("Multi-index not supported.", nameof(indexes));
+            if (indexes.Length > 1) throw new System.ArgumentException("Multi-index not supported.", nameof(indexes));
 
             return this.BindSetValueByKey(indexes[0].Expression, value.Expression);
         }

@@ -38,11 +38,11 @@ public static class Math
 
     [LuaField("math.fmod")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double Fmod(long x, long y);
+    public static double Fmod(long x, long y) => throw new NotImplementedException();
 
     [LuaField("math.fmod")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double Fmod(double x, double y);
+    public static double Fmod(double x, double y) => throw new NotImplementedException();
 
     [LuaField("math.max")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -98,7 +98,7 @@ public static class Math
 
     [LuaField("math.random")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static long Random(long m, long n);
+    public static long Random(long m, long n) => throw new NotImplementedException();
 
     public static (long, long) RandomSeed(long x, long y)
     {
@@ -133,5 +133,7 @@ public static class Math
     {
         if (m is null) throw new ArgumentException(m, 1, TypeInfo.Integer);
         if (n is null) throw new ArgumentException(n, 1, TypeInfo.Integer);
+
+        throw new NotImplementedException();
     }
 }
