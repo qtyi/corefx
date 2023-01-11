@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Analyzers", "Analyzers", "{
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Qtyi.Lang.CodeStyle", "src\analyzers\Qtyi.Lang.CodeStyle\Qtyi.Lang.CodeStyle.csproj", "{3F64B9E4-919C-457F-BDCE-3695CA84D979}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Qtyi.Lua", "src\libraries\Qtyi.Lua\Qtyi.Lua.csproj", "{F87CBFAF-A025-4C7F-AD71-04EF43CD119F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,6 +31,10 @@ Global
 		{3F64B9E4-919C-457F-BDCE-3695CA84D979}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F64B9E4-919C-457F-BDCE-3695CA84D979}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F64B9E4-919C-457F-BDCE-3695CA84D979}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F87CBFAF-A025-4C7F-AD71-04EF43CD119F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F87CBFAF-A025-4C7F-AD71-04EF43CD119F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F87CBFAF-A025-4C7F-AD71-04EF43CD119F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F87CBFAF-A025-4C7F-AD71-04EF43CD119F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

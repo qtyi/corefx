@@ -16,6 +16,8 @@ public sealed class TypeInfo : Object, IEquatable<TypeInfo>, IEquatable<String>,
     public const string TypeInfo_Nil = "nil";
     public const string TypeInfo_Boolean = "boolean";
     public const string TypeInfo_Number = "number";
+    public const string TypeInfo_Integer = "integer";
+    public const string TypeInfo_Float = "float";
     public const string TypeInfo_String = "string";
     public const string TypeInfo_Function = "function";
     public const string TypeInfo_Userdata = "userdata";
@@ -25,6 +27,8 @@ public sealed class TypeInfo : Object, IEquatable<TypeInfo>, IEquatable<String>,
     public static readonly TypeInfo Nil = new(BasicType.Nil);
     public static readonly TypeInfo Boolean = new(BasicType.Boolean);
     public static readonly TypeInfo Number = new(BasicType.Number);
+    public static readonly TypeInfo Integer = new(BasicType.Integer);
+    public static readonly TypeInfo Float = new(BasicType.Float);
     public static readonly TypeInfo String = new(BasicType.String);
     public static readonly TypeInfo Function = new(BasicType.Function);
     public static readonly TypeInfo Userdata = new(BasicType.Userdata);
@@ -39,7 +43,9 @@ public sealed class TypeInfo : Object, IEquatable<TypeInfo>, IEquatable<String>,
         {
             TypeInfo_Nil => null,
             TypeInfo_Boolean => typeof(Boolean),
-            TypeInfo_Number => typeof(Number),
+            TypeInfo_Number or
+            TypeInfo_Integer or
+            TypeInfo_Float => typeof(Number),
             TypeInfo_String => typeof(String),
             TypeInfo_Function => typeof(Function),
             TypeInfo_Userdata => typeof(Userdata),
@@ -56,8 +62,16 @@ public sealed class TypeInfo : Object, IEquatable<TypeInfo>, IEquatable<String>,
             this._name = TypeInfo_Nil;
         else if (type == typeof(Boolean))
             this._name = TypeInfo_Boolean;
-        else if (type == typeof(Number))
-            this._name = TypeInfo_Number;
+        else if (typeof(Number).IsAssignableFrom(type))
+        {
+            this._type = typeof(Number);
+            if (type == typeof(Integer) || type == typeof(LargeInteger))
+                this._name = TypeInfo_Integer;
+            else if (type == typeof(Real) || type == typeof(DecimalReal))
+                this._name = TypeInfo_Float;
+            else
+                this._name = TypeInfo_Number;
+        }
         else if (type == typeof(String))
             this._name = TypeInfo_String;
         else if (type == typeof(Function))
@@ -110,9 +124,24 @@ public sealed class TypeInfo : Object, IEquatable<TypeInfo>, IEquatable<String>,
     };
     public bool Equals(string? other) => other is not null && this._name == other;
     public bool Equals(String? other) => other is not null && this._name == (string)other;
-    public bool Equals(TypeInfo? other) => other is not null && (this._name == other._name && this._type == other._type);
+    public bool Equals(TypeInfo? other)
+    {
+        if (other is null)
+            return false;
+        else if (this._type is null && other._type is null)
+            return this._name == other._name;
+        else
+            return this._type == other._type;
+    }
 
-    public override int GetHashCode() => this._name.GetHashCode() ^ (this._type is null ? 0 : this._type.GetHashCode());
+    public override int GetHashCode()
+    {
+        var hashCode = this._name.GetHashCode();
+        if (this._type is not null)
+            hashCode = HashCode.Combine(hashCode, this._type.GetHashCode());
+
+        return hashCode;
+    }
 
     public override string ToString() => this._name;
 
@@ -133,6 +162,8 @@ public enum BasicType
     Nil,
     Boolean,
     Number,
+    Integer,
+    Float,
     String,
     Function,
     Userdata,
