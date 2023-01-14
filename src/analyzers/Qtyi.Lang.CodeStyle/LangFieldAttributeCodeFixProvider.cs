@@ -7,6 +7,7 @@ using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
 using Microsoft.CodeAnalysis.CodeFixes;
+using Microsoft.CodeAnalysis.Operations;
 using CS = Microsoft.CodeAnalysis.CSharp;
 using VB = Microsoft.CodeAnalysis.VisualBasic;
 
@@ -24,13 +25,8 @@ public sealed class LangFieldAttributeCodeFixProvider : CodeFixProvider
 
     public override async Task RegisterCodeFixesAsync(CodeFixContext context)
     {
-#if false
-        if (!Debugger.IsAttached)
-        {
-            Debugger.Launch();
-        }
-#endif
-        var root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
+        var document = context.Document;
+        var root = await document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
         if (root is null) return;
 
         var diagnostic = context.Diagnostics.First();
@@ -40,10 +36,9 @@ public sealed class LangFieldAttributeCodeFixProvider : CodeFixProvider
             out var elseInherited)) return;
         var diagnosticSpan = diagnostic.Location.SourceSpan;
 
-        var containingNodes = root.FindToken(diagnosticSpan.Start).Parent?.AncestorsAndSelf();
-        if (containingNodes is null) return;
+        var model = await document.GetSemanticModelAsync(context.CancellationToken);
+        if (model is null) return;
 
-        var document = context.Document;
         var codeAction = CodeAction.Create("删除不符合的标志项", FixAttributeArgument);
         if (!elseInherited)
         {
@@ -54,28 +49,32 @@ public sealed class LangFieldAttributeCodeFixProvider : CodeFixProvider
         }
         context.RegisterCodeFix(codeAction, diagnostic);
 
+        static T? AncestorAndSelf<T>(IOperation? op) where T : class, IOperation
+        {
+            while (op is not null)
+            {
+                if (op is T tOp) return tOp;
+                op = op.Parent;
+            }
+            return null;
+        }
+
         async Task<Document> FixAttributeArgument(CancellationToken cancellationToken)
         {
+            var aOp = AncestorAndSelf<IAttributeOperation>(model.GetOperation(root.FindNode(diagnosticSpan), cancellationToken));
+            var ocOp = aOp?.Operation as IObjectCreationOperation;
+            var arg1 = ocOp?.Arguments.FirstOrDefault();
+            if (arg1 is null) return document;
+
             SyntaxNode oldNode, newNode;
+            oldNode = arg1.Syntax;
             if (root.Language == LanguageNames.CSharp)
             {
-                var argument = containingNodes.OfType<CS.Syntax.AttributeArgumentSyntax>().FirstOrDefault();
-                if (argument is null) return document;
-
-                if (cancellationToken.IsCancellationRequested) return document;
-
-                oldNode = argument;
-                newNode = await FixedCSharpAttributeArgument(argument, cancellationToken);
+                newNode = CreateCSharpAttributeArgument(expectedTargets);
             }
             else if (root.Language == LanguageNames.VisualBasic)
             {
-                var argument = containingNodes.OfType<VB.Syntax.ArgumentSyntax>().FirstOrDefault();
-                if (argument is null) return document;
-
-                if (cancellationToken.IsCancellationRequested) return document;
-
-                oldNode = argument;
-                newNode = await FixedVisualBasicAttributeArgument(argument, cancellationToken);
+                newNode = CreateVisualBasicAttributeArgument(expectedTargets);
             }
             else
             {
@@ -94,26 +93,10 @@ public sealed class LangFieldAttributeCodeFixProvider : CodeFixProvider
 
         async Task<Document> RemoveAttribute(CancellationToken cancellationToken)
         {
-            SyntaxNode node;
-            if (root.Language == LanguageNames.CSharp)
-            {
-                var attribute = containingNodes.OfType<CS.Syntax.AttributeSyntax>().FirstOrDefault();
-                if (attribute is null) return document;
+            var aOp = AncestorAndSelf<IAttributeOperation>(model.GetOperation(root.FindNode(diagnosticSpan), cancellationToken));
+            if (aOp is null) return document;
 
-                node = attribute;
-            }
-            else if (root.Language == LanguageNames.VisualBasic)
-            {
-                var attribute = containingNodes.OfType<VB.Syntax.AttributeSyntax>().FirstOrDefault();
-                if (attribute is null) return document;
-
-                node = attribute;
-            }
-            else
-            {
-                Debug.Assert(false);
-                return document;
-            }
+            var node = aOp.Syntax;
 
             if (cancellationToken.IsCancellationRequested) return document;
 
@@ -126,13 +109,52 @@ public sealed class LangFieldAttributeCodeFixProvider : CodeFixProvider
         }
     }
 
-    private async Task<CS.Syntax.AttributeArgumentSyntax> FixedCSharpAttributeArgument(CS.Syntax.AttributeArgumentSyntax attributeArgument, CancellationToken cancellationToken)
+    private CS.Syntax.AttributeArgumentSyntax CreateCSharpAttributeArgument(AttributeTargets expectedTargets)
     {
-        throw new NotImplementedException();
+        var type = typeof(AttributeTargets);
+        var operands = expectedTargets.GetFlags().DefaultIfEmpty(AttributeTargets.All).Select(flag =>
+            (CS.Syntax.ExpressionSyntax)CS.SyntaxFactory.MemberAccessExpression(
+                CS.SyntaxKind.SimpleMemberAccessExpression,
+                CS.SyntaxFactory.ParseTypeName(type.FullName),
+                CS.SyntaxFactory.IdentifierName(Enum.GetName(type, flag))
+            )
+        ).ToArray();
+
+        if (operands.Length == 1)
+            return CS.SyntaxFactory.AttributeArgument(operands[0]);
+        else
+            return CS.SyntaxFactory.AttributeArgument(
+                operands.Skip(1).Aggregate(
+                    operands[0],
+                    (left, right) => CS.SyntaxFactory.BinaryExpression(CS.SyntaxKind.BitwiseOrExpression, left, right)
+                )
+            );
     }
 
-    private async Task<CS.Syntax.AttributeArgumentSyntax> FixedVisualBasicAttributeArgument(VB.Syntax.ArgumentSyntax attributeArgument, CancellationToken cancellationToken)
+    private VB.Syntax.ArgumentSyntax CreateVisualBasicAttributeArgument(AttributeTargets expectedTargets)
     {
-        throw new NotImplementedException();
+        var type = typeof(AttributeTargets);
+        var operands = expectedTargets.GetFlags().DefaultIfEmpty(AttributeTargets.All).Select(flag =>
+            (VB.Syntax.ExpressionSyntax)VB.SyntaxFactory.SimpleMemberAccessExpression(
+                VB.SyntaxFactory.ParseTypeName(type.FullName),
+                VB.SyntaxFactory.Token(VB.SyntaxKind.DotToken),
+                VB.SyntaxFactory.IdentifierName(Enum.GetName(type, flag))
+            )
+        ).ToArray();
+
+        if (operands.Length == 1)
+            return VB.SyntaxFactory.SimpleArgument(operands[0]);
+        else
+            return VB.SyntaxFactory.SimpleArgument(
+                operands.Skip(1).Aggregate(
+                    operands[0],
+                    (left, right) => VB.SyntaxFactory.BinaryExpression(
+                        VB.SyntaxKind.OrExpression,
+                        left,
+                        VB.SyntaxFactory.Token(VB.SyntaxKind.OrKeyword),
+                        right
+                    )
+                )
+            );
     }
 }

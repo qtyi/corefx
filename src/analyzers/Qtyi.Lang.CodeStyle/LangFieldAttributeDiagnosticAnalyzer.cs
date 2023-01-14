@@ -144,7 +144,7 @@ public sealed class LangFieldAttributeDiagnosticAnalyzer : DiagnosticAnalyzer
         out AttributeTargets actualTargets,
         out bool elseInherited)
     {
-        var result = false;
+        var result = true;
         expectedTargets = default;
         actualTargets = default;
         elseInherited = default;

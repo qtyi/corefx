@@ -3,13 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.CompilerServices;
-using Microsoft.CodeAnalysis;
 using Qtyi.CodeAnalysis.CSharp.Testing.XUnit;
 
 namespace Qtyi.CodeAnalysis.UnitTests;
 
 using VerifyAnalyzer = AnalyzerVerifier<LangFieldAttributeDiagnosticAnalyzer>;
-//using VerifyCodeFix = CodeFixVerifier<LangFieldAttributeDiagnosticAnalyzer, LangFieldAttributeCodeFixProvider>;
+using VerifyCodeFix = CodeFixVerifier<LangFieldAttributeDiagnosticAnalyzer, LangFieldAttributeCodeFixProvider>;
 
 public partial class LangFieldAttributeTests
 {
@@ -185,7 +184,7 @@ public partial class LangFieldAttributeTests
             writer.WriteLine($$"""
                 using System;
 
-                [AttributeUsage({{validOnStr}})]
+                [AttributeUsage([|{{validOnStr}}|])]
                 internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
                 {
                 """);
@@ -218,7 +217,7 @@ public partial class LangFieldAttributeTests
             writer.WriteLine($$"""
                 using System;
 
-                [AttributeUsage({{validOnStr}})]
+                [AttributeUsage([|{{validOnStr}}|])]
                 internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
                 {
                 """);
@@ -231,24 +230,6 @@ public partial class LangFieldAttributeTests
             writer.WriteLine("}");
         });
 
-        await new TestCodeFix()
-        {
-            ReferenceAssemblies = FrameworkReferenceAssemblies,
-            TestCode = source,
-            TestState =
-            {
-                AdditionalReferences = { AssemblyLocation_QtyiLangCoreLib }
-            },
-            FixedCode = fixedSource,
-            ExpectedDiagnostics =
-            {
-                VerifyAnalyzer.Diagnostic(LangFieldAttributeDiagnosticAnalyzer.s_UnexpectedAttributeTargets)
-                    .WithArguments(
-                        baseAttributeType.Name,
-                        Enum.Format(typeof(AttributeTargets), baseAttributeTypeValidOn, "F")
-                    )
-                    .WithLocation(3, 17)
-            }
-        }.RunAsync();
+        await VerifyCodeFix.VerifyCodeFixAsync(source, fixedSource);
     }
 }

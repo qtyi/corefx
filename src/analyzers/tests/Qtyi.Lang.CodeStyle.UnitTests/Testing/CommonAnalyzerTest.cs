@@ -10,7 +10,7 @@ namespace Qtyi.CodeAnalysis.Testing.XUnit;
 
 internal abstract class CommonAnalyzerTest : AnalyzerTest<XUnitVerifier>
 {
-    protected static readonly ReferenceAssemblies FrameworkReferenceAssemblies =
+    internal static readonly ReferenceAssemblies FrameworkReferenceAssemblies =
 #if NET472
         ReferenceAssemblies.NetStandard.NetStandard20;
 #elif NETCOREAPP3_1
@@ -19,8 +19,8 @@ internal abstract class CommonAnalyzerTest : AnalyzerTest<XUnitVerifier>
         ReferenceAssemblies.Net.Net60;
 #endif
 
-    protected static readonly Assembly Assembly_QtyiLangCoreLib = typeof(Qtyi.Runtime.Object).Assembly;
-    protected static readonly string AssemblyLocation_QtyiLangCoreLib = Assembly_QtyiLangCoreLib.Location;
+    internal static readonly Assembly Assembly_QtyiLangCoreLib = typeof(Qtyi.Runtime.Object).Assembly;
+    internal static readonly string AssemblyLocation_QtyiLangCoreLib = Assembly_QtyiLangCoreLib.Location;
 
     protected CommonAnalyzerTest()
     {
