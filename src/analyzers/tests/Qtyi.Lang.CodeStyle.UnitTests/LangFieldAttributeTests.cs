@@ -11,17 +11,6 @@ namespace Qtyi.CodeAnalysis.UnitTests;
 
 public partial class LangFieldAttributeTests : TestBase
 {
-    protected static readonly CodeGeneratorOptions CodeGeneratorOptions = new()
-    {
-        BlankLinesBetweenMembers = true,
-        BracingStyle = "C",
-        ElseOnClosing = false,
-        IndentString = "    ",
-        VerbatimOrder = true,
-    };
-    protected static readonly CodeDomProvider CSharpCodeProvider = new CSharpCodeProvider();
-    protected static readonly CodeDomProvider VisualBasicCodeProvider = new VBCodeProvider();
-
     protected static AttributeTargets? GetAttributeValidOn<T>() where T : Attribute => GetAttributeValidOn(typeof(T));
 
     protected static AttributeTargets? GetAttributeValidOn(Type enumType) => enumType.GetCustomAttribute<AttributeUsageAttribute>()!.ValidOn;

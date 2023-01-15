@@ -10,10 +10,11 @@ namespace Qtyi.CodeAnalysis.UnitTests;
 
 public abstract class TestBase
 {
-    protected static string BuildSource(Action<IndentedTextWriter> writeAction)
+    protected static string BuildSource<TWriter>(Action<TWriter> writeAction)
+        where TWriter : IndentedTextWriter, new()
     {
-        using var writer = new StringWriter();
-        writeAction(new(writer));
+        var writer = new TWriter();
+        writeAction(writer);
         return writer.ToString();
     }
 }

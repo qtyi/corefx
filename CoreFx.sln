@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Qtyi.Lua", "src\libraries\Q
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Qtyi.Lang.CodeStyle.UnitTests", "src\analyzers\tests\Qtyi.Lang.CodeStyle.UnitTests\Qtyi.Lang.CodeStyle.UnitTests.csproj", "{2BC575C8-FEEE-4710-90E5-D47B22548F3A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Qtyi.Analyzers.TestUtilities", "src\analyzers\tests\utilities\Qtyi.Analyzers.TestUtilities\Qtyi.Analyzers.TestUtilities.csproj", "{71D1CBAD-1F20-4C10-BC7A-C4C0BD7F17EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,10 @@ Global
 		{2BC575C8-FEEE-4710-90E5-D47B22548F3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2BC575C8-FEEE-4710-90E5-D47B22548F3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2BC575C8-FEEE-4710-90E5-D47B22548F3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71D1CBAD-1F20-4C10-BC7A-C4C0BD7F17EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71D1CBAD-1F20-4C10-BC7A-C4C0BD7F17EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71D1CBAD-1F20-4C10-BC7A-C4C0BD7F17EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71D1CBAD-1F20-4C10-BC7A-C4C0BD7F17EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -48,6 +54,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{3F64B9E4-919C-457F-BDCE-3695CA84D979} = {6E406794-5F8E-4188-81FA-4877BFFC573A}
 		{2BC575C8-FEEE-4710-90E5-D47B22548F3A} = {6E406794-5F8E-4188-81FA-4877BFFC573A}
+		{71D1CBAD-1F20-4C10-BC7A-C4C0BD7F17EE} = {6E406794-5F8E-4188-81FA-4877BFFC573A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D7F6A672-6B94-4EA7-A0F9-405A4489D46E}

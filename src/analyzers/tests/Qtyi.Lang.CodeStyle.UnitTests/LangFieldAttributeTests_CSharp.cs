@@ -3,10 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.CompilerServices;
+using Qtyi.CodeAnalysis.CSharp;
 using Qtyi.CodeAnalysis.CSharp.Testing.XUnit;
 
 namespace Qtyi.CodeAnalysis.UnitTests;
 
+using CodeWriter = CSharpCodeTextWriter;
 using VerifyAnalyzer = AnalyzerVerifier<LangFieldAttributeDiagnosticAnalyzer>;
 using VerifyCodeFix = CodeFixVerifier<LangFieldAttributeDiagnosticAnalyzer, LangFieldAttributeCodeFixProvider>;
 
@@ -23,7 +25,7 @@ public partial class LangFieldAttributeTests
     public async Task TestAnalyzeNoAttributeUsageAttribute(Type baseAttributeType)
     {
         const string attributeName = "SimpleFieldAttribute";
-        var source = BuildSource(writer =>
+        var source = BuildSource<CodeWriter>(writer =>
         {
             writer.Write($$"""
                 using System;
@@ -31,12 +33,12 @@ public partial class LangFieldAttributeTests
                 internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
                 {
                 """);
-            writer.Indent++;
+            writer.Indent();
             foreach (var ctor in GenerateCSharpConstructors(attributeName, baseAttributeType))
             {
                 writer.WriteLine(ctor);
             }
-            writer.Indent--;
+            writer.Unindent();
             writer.WriteLine("}");
         });
 
@@ -50,7 +52,7 @@ public partial class LangFieldAttributeTests
         const string attributeName = "SimpleFieldAttribute";
         var baseAttributeTypeValidOn = GetAttributeValidOn(baseAttributeType) ?? AttributeTargets.All;
 
-        var source = BuildSource(writer =>
+        var source = BuildSource<CodeWriter>(writer =>
         {
             var validOnStr = string.Join(" | ", baseAttributeTypeValidOn.GetFlags().Select(flag => "AttributeTargets." + Enum.GetName(typeof(AttributeTargets), flag)));
             writer.WriteLine($$"""
@@ -60,12 +62,12 @@ public partial class LangFieldAttributeTests
                 internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
                 {
                 """);
-            writer.Indent++;
+            writer.Indent();
             foreach (var ctor in GenerateCSharpConstructors(attributeName, baseAttributeType))
             {
                 writer.WriteLine(ctor);
             }
-            writer.Indent--;
+            writer.Unindent();
             writer.WriteLine("}");
         });
 
@@ -79,7 +81,7 @@ public partial class LangFieldAttributeTests
         const string attributeName = "SimpleFieldAttribute";
         var baseAttributeTypeValidOn = GetAttributeValidOn(baseAttributeType) ?? AttributeTargets.All;
 
-        var source = BuildSource(writer =>
+        var source = BuildSource<CodeWriter>(writer =>
         {
             var validOn = MakeSubsetAsync(baseAttributeTypeValidOn);
             var validOnStr = string.Join(" | ", validOn.GetFlags().Select(flag => "AttributeTargets." + Enum.GetName(typeof(AttributeTargets), flag)));
@@ -90,12 +92,12 @@ public partial class LangFieldAttributeTests
                 internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
                 {
                 """);
-            writer.Indent++;
+            writer.Indent();
             foreach (var ctor in GenerateCSharpConstructors(attributeName, baseAttributeType))
             {
                 writer.WriteLine(ctor);
             }
-            writer.Indent--;
+            writer.Unindent();
             writer.WriteLine("}");
 
             static AttributeTargets MakeSubsetAsync(AttributeTargets targets)
@@ -124,7 +126,7 @@ public partial class LangFieldAttributeTests
         var baseAttributeTypeValidOn = GetAttributeValidOn(baseAttributeType) ?? AttributeTargets.All;
         if (baseAttributeTypeValidOn == AttributeTargets.All) return;
 
-        var source = BuildSource(writer =>
+        var source = BuildSource<CodeWriter>(writer =>
         {
             var validOn = MakeSupersetAsync(baseAttributeTypeValidOn);
             var validOnStr = string.Join(" | ", validOn.GetFlags().Select(flag => "AttributeTargets." + Enum.GetName(typeof(AttributeTargets), flag)));
@@ -135,12 +137,12 @@ public partial class LangFieldAttributeTests
                 internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
                 {
                 """);
-            writer.Indent++;
+            writer.Indent();
             foreach (var ctor in GenerateCSharpConstructors(attributeName, baseAttributeType))
             {
                 writer.WriteLine(ctor);
             }
-            writer.Indent--;
+            writer.Unindent();
             writer.WriteLine("}");
 
             static AttributeTargets MakeSupersetAsync(AttributeTargets targets)
@@ -177,7 +179,7 @@ public partial class LangFieldAttributeTests
         var baseAttributeTypeValidOn = GetAttributeValidOn(baseAttributeType) ?? AttributeTargets.All;
         if (baseAttributeTypeValidOn == AttributeTargets.All) return;
 
-        var source = BuildSource(writer =>
+        var source = BuildSource<CodeWriter>(writer =>
         {
             var validOn = MakeSupersetAsync(baseAttributeTypeValidOn);
             var validOnStr = string.Join(" | ", validOn.GetFlags().Select(flag => "AttributeTargets." + Enum.GetName(typeof(AttributeTargets), flag)));
@@ -188,12 +190,12 @@ public partial class LangFieldAttributeTests
                 internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
                 {
                 """);
-            writer.Indent++;
+            writer.Indent();
             foreach (var ctor in GenerateCSharpConstructors(attributeName, baseAttributeType))
             {
                 writer.WriteLine(ctor);
             }
-            writer.Indent--;
+            writer.Unindent();
             writer.WriteLine("}");
 
             static AttributeTargets MakeSupersetAsync(AttributeTargets targets)
@@ -211,7 +213,7 @@ public partial class LangFieldAttributeTests
                 return targets | newFlags;
             }
         });
-        var fixedSource = BuildSource(writer =>
+        var fixedSource = BuildSource<CodeWriter>(writer =>
         {
             var validOnStr = string.Join(" | ", baseAttributeTypeValidOn.GetFlags().Select(flag => "AttributeTargets." + Enum.GetName(typeof(AttributeTargets), flag)));
             writer.WriteLine($$"""
@@ -221,12 +223,12 @@ public partial class LangFieldAttributeTests
                 internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
                 {
                 """);
-            writer.Indent++;
+            writer.Indent();
             foreach (var ctor in GenerateCSharpConstructors(attributeName, baseAttributeType))
             {
                 writer.WriteLine(ctor);
             }
-            writer.Indent--;
+            writer.Unindent();
             writer.WriteLine("}");
         });
 
