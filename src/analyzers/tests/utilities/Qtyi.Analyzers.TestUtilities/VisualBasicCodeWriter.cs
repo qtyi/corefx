@@ -4,11 +4,11 @@
 
 namespace Qtyi.CodeAnalysis.VisualBasic;
 
-internal class VisualBasicCodeTextWriter : IndentedTextWriter
+internal class VisualBasicCodeWriter : IndentedStringWriter
 {
     public const string VisualBasicTabString = "    ";
 
-    public VisualBasicCodeTextWriter() : base(VisualBasicTabString) { }
+    public VisualBasicCodeWriter() : base(VisualBasicTabString) { }
 
-    public VisualBasicCodeTextWriter(IFormatProvider? formatProvider) : base(VisualBasicTabString, formatProvider) { }
+    public VisualBasicCodeWriter(IFormatProvider? formatProvider) : base(VisualBasicTabString, formatProvider) { }
 }

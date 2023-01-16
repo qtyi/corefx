@@ -4,6 +4,7 @@
 
 namespace System.Runtime.CompilerServices;
 
+[AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]
 internal sealed class LuaFieldAttribute : LangFieldAttribute
 {
     public LuaFieldAttribute(string qualifiedName) : base(qualifiedName) { }

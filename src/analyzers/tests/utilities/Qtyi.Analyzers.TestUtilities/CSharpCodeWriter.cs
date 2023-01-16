@@ -4,11 +4,11 @@
 
 namespace Qtyi.CodeAnalysis.CSharp;
 
-internal class CSharpCodeTextWriter : IndentedTextWriter
+internal class CSharpCodeWriter : IndentedStringWriter
 {
     public const string CSharpTabString = "    ";
 
-    public CSharpCodeTextWriter() : base(CSharpTabString) { }
+    public CSharpCodeWriter() : base(CSharpTabString) { }
 
-    public CSharpCodeTextWriter(IFormatProvider? formatProvider) : base(CSharpTabString, formatProvider) { }
+    public CSharpCodeWriter(IFormatProvider? formatProvider) : base(CSharpTabString, formatProvider) { }
 }

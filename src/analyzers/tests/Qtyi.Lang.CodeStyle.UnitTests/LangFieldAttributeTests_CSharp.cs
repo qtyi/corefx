@@ -6,9 +6,9 @@ using System.Runtime.CompilerServices;
 using Qtyi.CodeAnalysis.CSharp;
 using Qtyi.CodeAnalysis.CSharp.Testing.XUnit;
 
-namespace Qtyi.CodeAnalysis.UnitTests;
+namespace Qtyi.CodeAnalysis.Editor.UnitTests;
 
-using CodeWriter = CSharpCodeTextWriter;
+using CodeWriter = CSharpCodeWriter;
 using VerifyAnalyzer = AnalyzerVerifier<LangFieldAttributeDiagnosticAnalyzer>;
 using VerifyCodeFix = CodeFixVerifier<LangFieldAttributeDiagnosticAnalyzer, LangFieldAttributeCodeFixProvider>;
 
@@ -133,7 +133,7 @@ public partial class LangFieldAttributeTests
             writer.WriteLine($$"""
                 using System;
 
-                [AttributeUsage({{validOnStr}})]
+                [AttributeUsage({|{{LangFieldAttributeDiagnosticAnalyzer.s_UnexpectedAttributeTargets.Id}}:{{validOnStr}}|})]
                 internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
                 {
                 """);
@@ -161,19 +161,12 @@ public partial class LangFieldAttributeTests
             }
         });
 
-        await VerifyAnalyzer.VerifyAnalyzerAsync(source,
-            VerifyAnalyzer.Diagnostic(LangFieldAttributeDiagnosticAnalyzer.s_UnexpectedAttributeTargets)
-                .WithArguments(
-                    baseAttributeType.Name,
-                    Enum.Format(typeof(AttributeTargets), baseAttributeTypeValidOn, "F")
-                )
-                .WithLocation(3, 17)
-        );
+        await VerifyAnalyzer.VerifyAnalyzerAsync(source);
     }
 
     [Theory]
     [MemberData(nameof(SupportedBaseAttributeTypes))]
-    public async Task TestCodeFixSupersetAttributeTargets(Type baseAttributeType)
+    public async Task TestFixSupersetAttributeTargetsByFixAttributeArgument(Type baseAttributeType)
     {
         const string attributeName = "SimpleFieldAttribute";
         var baseAttributeTypeValidOn = GetAttributeValidOn(baseAttributeType) ?? AttributeTargets.All;
@@ -186,7 +179,8 @@ public partial class LangFieldAttributeTests
             writer.WriteLine($$"""
                 using System;
 
-                [AttributeUsage([|{{validOnStr}}|])]
+                [AttributeUsage({|{{LangFieldAttributeDiagnosticAnalyzer.s_UnexpectedAttributeTargets.Id}}:{{validOnStr}}|},
+                    AllowMultiple = false, Inherited = true)]
                 internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
                 {
                 """);
@@ -218,8 +212,9 @@ public partial class LangFieldAttributeTests
             var validOnStr = string.Join(" | ", baseAttributeTypeValidOn.GetFlags().Select(flag => "AttributeTargets." + Enum.GetName(typeof(AttributeTargets), flag)));
             writer.WriteLine($$"""
                 using System;
-
-                [AttributeUsage([|{{validOnStr}}|])]
+                
+                [AttributeUsage({{validOnStr}},
+                    AllowMultiple = false, Inherited = true)]
                 internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
                 {
                 """);
@@ -231,6 +226,70 @@ public partial class LangFieldAttributeTests
             writer.Unindent();
             writer.WriteLine("}");
         });
+
+        await VerifyCodeFix.VerifyCodeFixAsync(source, fixedSource);
+    }
+
+    [Theory]
+    [MemberData(nameof(SupportedBaseAttributeTypes))]
+    public async Task TestFixSupersetAttributeTargetsByRemoveAttribute(Type baseAttributeType)
+    {
+        const string attributeName = "SimpleFieldAttribute";
+        var baseAttributeTypeValidOn = GetAttributeValidOn(baseAttributeType) ?? AttributeTargets.All;
+        if (baseAttributeTypeValidOn == AttributeTargets.All) return;
+
+        var source = BuildSource<CodeWriter>(writer =>
+        {
+            var validOn = MakeSupersetAsync(baseAttributeTypeValidOn);
+            var validOnStr = string.Join(" | ", validOn.GetFlags().Select(flag => "AttributeTargets." + Enum.GetName(typeof(AttributeTargets), flag)));
+            writer.WriteLine($$"""
+                using System;
+
+                [AttributeUsage({|{{LangFieldAttributeDiagnosticAnalyzer.s_UnexpectedAttributeTargets.Id}}:{{validOnStr}}|})]
+                internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
+                {
+                """);
+            writer.Indent();
+            foreach (var ctor in GenerateCSharpConstructors(attributeName, baseAttributeType))
+            {
+                writer.WriteLine(ctor);
+            }
+            writer.Unindent();
+            writer.WriteLine("}");
+
+            static AttributeTargets MakeSupersetAsync(AttributeTargets targets)
+            {
+                var complement = ~targets & AttributeTargets.All;
+                var flags = complement.GetFlags().ToArray();
+                var random = new Random();
+                var count = random.Next(1, flags.Length);
+                var newFlags = default(AttributeTargets);
+                for (var i = 0; i < count; i++)
+                {
+                    newFlags |= flags[random.Next(flags.Length)];
+                }
+
+                return targets | newFlags;
+            }
+        });
+        var fixedSource = BuildSource<CodeWriter>(writer =>
+        {
+            writer.WriteLine($$"""
+                using System;
+                
+                internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
+                {
+                """);
+            writer.Indent();
+            foreach (var ctor in GenerateCSharpConstructors(attributeName, baseAttributeType))
+            {
+                writer.WriteLine(ctor);
+            }
+            writer.Unindent();
+            writer.WriteLine("}");
+        });
+
+        var test = new CodeFixTest<LangFieldAttributeDiagnosticAnalyzer, LangFieldAttributeCodeFixProvider>();
 
         await VerifyCodeFix.VerifyCodeFixAsync(source, fixedSource);
     }

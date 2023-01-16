@@ -2,12 +2,9 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.CodeDom.Compiler;
 using System.Reflection;
-using Microsoft.CSharp;
-using Microsoft.VisualBasic;
 
-namespace Qtyi.CodeAnalysis.UnitTests;
+namespace Qtyi.CodeAnalysis.Editor.UnitTests;
 
 public partial class LangFieldAttributeTests : TestBase
 {

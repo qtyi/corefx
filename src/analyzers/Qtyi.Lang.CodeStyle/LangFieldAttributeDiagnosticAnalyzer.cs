@@ -85,7 +85,7 @@ public sealed class LangFieldAttributeDiagnosticAnalyzer : DiagnosticAnalyzer
 
             bool elseInherited;
             var initializer = ocOp.Initializer;
-            if (initializer is null) elseInherited = false;
+            if (initializer is null) elseInherited = true;
             else
             {
                 elseInherited = true;

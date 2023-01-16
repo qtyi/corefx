@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(TestTargetFrameworks)</TargetFrameworks>
-    <RootNamespace>Qtyi.CodeAnalysis.UnitTests</RootNamespace>
+    <RootNamespace>Qtyi.CodeAnalysis.Editor.UnitTests</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
