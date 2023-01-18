@@ -56,6 +56,8 @@ public sealed class Function : Object
 
     public override TypeInfo GetTypeInfo() => TypeInfo.Function;
 
+    protected override String ToStringCore() => $"function: {string.Concat(BitConverter.GetBytes(this.GetHashCode()).Select(b => Convert.ToString(b, 16)))}";
+
     /// <inheritdoc/>
     /// <exception cref="InvalidCastException"><paramref name="type"/> 不是能接受的转换目标类型。</exception>
     public override object ChangeType(Type type)

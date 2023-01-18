@@ -102,6 +102,10 @@ internal sealed class DecimalReal : Number, IComparable<DecimalReal>, IComparabl
     public string ToString(string? format, IFormatProvider? formatProvider) => this._value.ToString(format, formatProvider);
     #endregion
 
+    #region Object
+    protected override String ToStringCore() => this._value.ToString();
+    #endregion
+
     #region 操作符
     public static implicit operator DecimalReal(decimal value) => new(value);
     public static explicit operator decimal(DecimalReal value) => value._value;

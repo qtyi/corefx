@@ -100,6 +100,10 @@ internal sealed class Real : Number, IComparable<Real>, IComparable<double>, IEq
     public string ToString(string? format, IFormatProvider? formatProvider) => this._value.ToString(format, formatProvider);
     #endregion
 
+    #region Object
+    protected override String ToStringCore() => this._value.ToString();
+    #endregion
+
     #region 操作符
     public static implicit operator Real(float value) => new Real(value);
     public static implicit operator Real(double value) => new(value);

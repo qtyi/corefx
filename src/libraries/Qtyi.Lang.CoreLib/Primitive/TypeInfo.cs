@@ -111,6 +111,8 @@ public sealed class TypeInfo : Object, IEquatable<TypeInfo>, IEquatable<String>,
 
     public override TypeInfo GetTypeInfo() => TypeInfo.String;
 
+    protected override String ToStringCore() => this._name;
+
     protected override MultiReturns InvokeCore(params Object?[] args) => ((String)this).Invoke(args);
     #endregion
 
@@ -142,8 +144,6 @@ public sealed class TypeInfo : Object, IEquatable<TypeInfo>, IEquatable<String>,
 
         return hashCode;
     }
-
-    public override string ToString() => this._name;
 
     /// <inheritdoc/>
     /// <exception cref="InvalidCastException"><paramref name="type"/> 不是能接受的转换目标类型。</exception>

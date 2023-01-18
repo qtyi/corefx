@@ -18,4 +18,6 @@ internal static class PrimitiveTypeExtensions
         Userdata => typeof(Userdata),
         _ => null,
     };
+
+    public static T ChangeType<T>(this Object obj) => (T)obj.ChangeType(typeof(T));
 }

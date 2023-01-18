@@ -70,6 +70,8 @@ public sealed class Boolean : Object, IComparable, IComparable<Boolean>, ICompar
         set => Boolean.s_mt = value;
     }
 
+    protected override String ToStringCore() => this._value.ToString();
+
     public override TypeInfo GetTypeInfo() => TypeInfo.Boolean;
 
     /// <inheritdoc/>

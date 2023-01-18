@@ -2,8 +2,8 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Runtime.CompilerServices;
+using Qtyi.Runtime.CompilerServices;
 
 [assembly: LuaField("math.abs", UnderlyingType = typeof(Math), MemberName = nameof(Math.Abs))]
 [assembly: LuaField("math.acos", UnderlyingType = typeof(Math), MemberName = nameof(Math.Acos))]
@@ -24,17 +24,17 @@ using System.Runtime.CompilerServices;
 namespace Qtyi.Runtime.Mapping;
 
 [LuaFieldIgnore]
-public static class Math
+public static class MathModel
 {
     private static Random s_random = new();
 
     [LuaField("math.atan")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double Atan(double y, double x = 1D) => System.Math.Atan(y / x);
+    public static double Atan(double y, double x = 1D) => Math.Atan(y / x);
 
     [LuaField("math.deg")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double Deg(double x) => x * 180D / System.Math.PI;
+    public static double Deg(double x) => x * 180D / Math.PI;
 
     [LuaField("math.fmod")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -74,14 +74,14 @@ public static class Math
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static MultiReturns<Number, Number> Modf(double x)
     {
-        var integral = System.Math.Ceiling(x);
+        var integral = Math.Ceiling(x);
         var fractional = x - integral;
         return new((long)integral, fractional);
     }
 
     [LuaField("math.rad")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static double Rad(double x) => x * System.Math.PI / 180D;
+    public static double Rad(double x) => x * Math.PI / 180D;
 
     [LuaField("math.random")]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

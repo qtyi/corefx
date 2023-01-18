@@ -69,6 +69,27 @@ public class Table : Object
     public virtual void Add(Object index, Object? value) => this[index] = value;
 
     /// <summary>
+    /// 获取表中第一个序列的长度。
+    /// </summary>
+    public sealed override Object? Length
+    {
+        get
+        {
+            var mvLength = this.GetMetavalue(Qtyi.Runtime.Metatable.Metavalue_LengthOperation);
+            if (mvLength is null)
+            {
+                for (var i = 1L; ; i++)
+                {
+                    if (this.dictionary.ContainsKey(i))
+                        return i - 1;
+                }
+            }
+            else
+                return mvLength.Invoke(this)[0];
+        }
+    }
+
+    /// <summary>
     /// 获取表中指定键对应的值，忽略元表的影响。
     /// </summary>
     /// <param name="table">值所在的表。</param>
@@ -127,6 +148,8 @@ public class Table : Object
     }
 
     public override TypeInfo GetTypeInfo() => TypeInfo.Table;
+
+    protected override String ToStringCore() => $"table: {string.Concat(BitConverter.GetBytes(this.GetHashCode()).Select(b => Convert.ToString(b, 16)))}";
 
     /// <inheritdoc/>
     /// <exception cref="InvalidCastException"><paramref name="type"/> 不是能接受的转换目标类型。</exception>

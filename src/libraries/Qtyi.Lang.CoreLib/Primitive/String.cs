@@ -42,6 +42,20 @@ public sealed partial class String : Object, IComparable, IComparable<String?>, 
 
     public bool Equals(string? other) => this.Equals(other is null ? null : (String)other);
 
+    public static String Concat(params String[] values)
+    {
+        var length = values.Sum(value => value._value.Length);
+        var newValue = new byte[length];
+        int position = 0;
+        foreach (var value in values)
+        {
+            value._value.Span.CopyTo(newValue.AsSpan(position));
+            position += value._value.Length;
+        }
+
+        return newValue;
+    }
+
     #region ICloneable
     public object Clone()
     {
@@ -96,9 +110,16 @@ public sealed partial class String : Object, IComparable, IComparable<String?>, 
         set => String.s_mt = value;
     }
 
+    /// <summary>
+    /// 获取字符串的字节长度。
+    /// </summary>
+    public override Object? Length => this._value.Length;
+
     public override int GetHashCode() => this._value.GetHashCode();
 
     public override string ToString() => Encoding.UTF8.GetString(this._value.ToArray());
+
+    protected override String? ToStringCore() => this;
 
     public override TypeInfo GetTypeInfo() => TypeInfo.String;
 

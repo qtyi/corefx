@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\shared\IsExternalInit.cs" Link="System.Runtime.CompilerServices\IsExternalInit.cs" />
+    <Compile Include="..\..\shared\IsExternalInit.cs" Link="CompilerServices\IsExternalInit.cs" />
   </ItemGroup>
 
   <ItemGroup>

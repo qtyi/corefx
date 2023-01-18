@@ -2,8 +2,10 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.Linq.Expressions;
+using Qtyi.Runtime.CompilerServices;
 
 namespace Qtyi.Runtime;
 
@@ -29,9 +31,66 @@ public abstract partial class Object : IDynamicMetaObjectProvider
     protected internal abstract Table? Metatable { get; set; }
 
     /// <summary>
-    /// 获取一个值，指示此示例是否可以被调用。
+    /// 获取一个值，指示此实例是否可以被调用。
     /// </summary>
     public virtual bool IsCallable => this.GetMetavalue(Qtyi.Runtime.Metatable.Metavalue_CallOperation)?.IsCallable == true;
+
+    /// <summary>
+    /// 获取一个值，表示此实例的长度。
+    /// </summary>
+    public virtual Object? Length
+    {
+        get
+        {
+            const string MetavalueName = Qtyi.Runtime.Metatable.Metavalue_LengthOperation;
+            var mvLength = this.GetMetavalue(MetavalueName);
+            if (mvLength is null)
+                throw new MetavalueNotFoundException(MetavalueName);
+            else
+                return mvLength.Invoke(this)[0];
+        }
+    }
+
+    public static Object? GetLength(Object? obj,
+        [CallerArgumentExpression(nameof(obj))] string[]? expressionNames = null,
+        [CallerArgumentExpressionType(nameof(obj))] CallerArgumentExpressionType expressionType = CallerArgumentExpressionType.Global)
+    {
+        Object? result = null;
+
+        bool throws = false;
+        System.Exception? innerException = null;
+        if (obj is null)
+        {
+            throws = true;
+        }
+        else
+        {
+            try
+            {
+                result = obj.Length;
+            }
+            catch (Exception ex)
+            {
+                throws = true;
+                innerException = ex;
+            }
+        }
+
+        if (throws)
+        {
+            var typeInfo = Object.GetTypeInfo(obj);
+            throw new InvalidLengthOperationException(
+                expressionNames is null ? $"attempt to get length of object (a {typeInfo} value)" :
+                    expressionType switch
+                    {
+                        CallerArgumentExpressionType.Field => $"attempt to get length of field '{expressionNames.Last()}' (a {typeInfo} value)",
+                        CallerArgumentExpressionType.Global => $"attempt to get length of global '{expressionNames.Last()}' (a {typeInfo} value)"
+                    },
+                innerException);
+        }
+        else
+            return result;
+    }
 
     /// <summary>
     /// 获取此实例的元表中特定建对应的值。
@@ -122,7 +181,7 @@ public abstract partial class Object : IDynamicMetaObjectProvider
     public static TypeInfo GetTypeInfo(Object? obj) => obj?.GetTypeInfo() ?? TypeInfo.TypeInfo_Nil;
 
     /// <summary>
-    /// 调用此示例。
+    /// 调用此实例。
     /// </summary>
     /// <param name="args">传入的参数。</param>
     /// <returns>调用的返回值。</returns>
@@ -173,6 +232,13 @@ public abstract partial class Object : IDynamicMetaObjectProvider
             return false;
         }
     }
+
+    public override string? ToString() => this.ToStringCore().ToString();
+
+    protected abstract String ToStringCore();
+
+    [return: NotNullIfNotNull(nameof(obj))]
+    public static String? ToString(Object? obj) => obj?.ToStringCore();
 
     #region DynamicObject
     DynamicMetaObject IDynamicMetaObjectProvider.GetMetaObject(Expression parameter) => new ObjectDynamicMetaObject(parameter, this);

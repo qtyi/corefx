@@ -108,6 +108,10 @@ internal sealed class Integer : Number, IComparable<Integer>, IComparable<long>,
     public string ToString(string? format, IFormatProvider? formatProvider) => this._value.ToString(format, formatProvider);
     #endregion
 
+    #region Object
+    protected override String ToStringCore() => this._value.ToString();
+    #endregion
+
     #region 操作符
     public static implicit operator Integer(sbyte value) => new(value);
     public static implicit operator Integer(byte value) => new(value);

@@ -14,8 +14,6 @@ internal sealed class Vanilla : Userdata, IEquatable<Vanilla>
 
     public bool Equals(Vanilla? other) => other is not null && this._value.Equals(other._value);
 
-    public override int GetHashCode() => this._value.GetHashCode();
-
     #region Object
     internal Table? mt;
 
@@ -25,7 +23,11 @@ internal sealed class Vanilla : Userdata, IEquatable<Vanilla>
         set => this.mt = value;
     }
 
+    public override int GetHashCode() => this._value.GetHashCode();
+
     public override TypeInfo GetTypeInfo() => new(this._value.GetType());
+
+    protected override String ToStringCore() => $"userdata [{_value.GetType().FullName}]: {string.Concat(BitConverter.GetBytes(this.GetHashCode()).Select(b => Convert.ToString(b, 16)))}";
 
     /// <inheritdoc/>
     /// <exception cref="InvalidCastException"><paramref name="type"/> 不是能接受的转换目标类型。</exception>

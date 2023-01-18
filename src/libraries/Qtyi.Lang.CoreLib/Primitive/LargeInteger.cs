@@ -110,6 +110,10 @@ internal sealed class LargeInteger : Number, IComparable<LargeInteger>, ICompara
     public string ToString(string? format, IFormatProvider? formatProvider) => this._value.ToString(format, formatProvider);
     #endregion
 
+    #region Object
+    protected override String ToStringCore() => this._value.ToString();
+    #endregion
+
     #region 操作符
     public static implicit operator LargeInteger(ulong value) => new(value);
     public static explicit operator ulong(LargeInteger value) => value._value;

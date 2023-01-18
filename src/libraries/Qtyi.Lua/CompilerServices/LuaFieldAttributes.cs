@@ -2,7 +2,7 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Runtime.CompilerServices;
+namespace Qtyi.Runtime.CompilerServices;
 
 [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]
 internal sealed class LuaFieldAttribute : LangFieldAttribute
