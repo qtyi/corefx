@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 
 namespace Qtyi.Runtime;
 
-public readonly struct MultiReturns<T1, T2, T3> : IMultiReturns
+public readonly struct MultiReturns<T1, T2, T3> : IMultiReturnsInternal
     where T1 : Object
     where T2 : Object
     where T3 : Object

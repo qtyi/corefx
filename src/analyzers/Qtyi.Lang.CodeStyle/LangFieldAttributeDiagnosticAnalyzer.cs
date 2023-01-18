@@ -12,7 +12,7 @@ namespace Qtyi.CodeAnalysis;
 [DiagnosticAnalyzer(LanguageNames.CSharp, LanguageNames.VisualBasic)]
 public sealed class LangFieldAttributeDiagnosticAnalyzer : DiagnosticAnalyzer
 {
-    internal static readonly DiagnosticDescriptor s_UnexpectedAttributeTargets = new(
+    internal static readonly DiagnosticDescriptor UnexpectedAttributeTargets = new(
         "QTYI1001",
         title: $"错误的“{nameof(AttributeTargets)}”",
         messageFormat: $"{{0}}的子类型的“{nameof(AttributeTargets)}”不应在{{1}}之外。",
@@ -21,7 +21,7 @@ public sealed class LangFieldAttributeDiagnosticAnalyzer : DiagnosticAnalyzer
         isEnabledByDefault: true);
 
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(
-        s_UnexpectedAttributeTargets
+        UnexpectedAttributeTargets
     );
 
     public override void Initialize(AnalysisContext context)
@@ -118,7 +118,7 @@ public sealed class LangFieldAttributeDiagnosticAnalyzer : DiagnosticAnalyzer
             if (cancellationToken.IsCancellationRequested) return;
 
             context.ReportDiagnostic(Diagnostic.Create(
-                s_UnexpectedAttributeTargets,
+                UnexpectedAttributeTargets,
                 location: arg1.Syntax.GetLocation(),
                 properties: CreateProperties(expectedTargets, validOn, elseInherited),
                 baseAttributeTypeSymbol.Name, Enum.Format(typeof(AttributeTargets), expectedTargets, "F")));

@@ -4,4 +4,4 @@
 
 namespace Qtyi.Runtime;
 
-public interface IMultiReturns : IReadOnlyList<Object?> { }
+internal interface IMultiReturnsInternal : IReadOnlyList<Object?> { }

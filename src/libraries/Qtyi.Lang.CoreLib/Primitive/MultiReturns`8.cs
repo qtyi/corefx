@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace Qtyi.Runtime;
 
-public readonly struct MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest> : IMultiReturns
+public readonly struct MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest> : IMultiReturnsInternal
     where T1 : Object
     where T2 : Object
     where T3 : Object
@@ -17,7 +17,7 @@ public readonly struct MultiReturns<T1, T2, T3, T4, T5, T6, T7, TRest> : IMultiR
     where T5 : Object
     where T6 : Object
     where T7 : Object
-    where TRest : struct, IMultiReturns
+    where TRest : struct, IReadOnlyList<Object?>
 {
     private readonly MultiReturns _values;
     private readonly TRest _rest;

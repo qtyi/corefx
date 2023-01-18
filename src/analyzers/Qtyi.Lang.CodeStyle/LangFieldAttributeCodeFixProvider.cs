@@ -18,7 +18,7 @@ namespace Qtyi.CodeAnalysis;
 public sealed class LangFieldAttributeCodeFixProvider : CodeFixProvider
 {
     public override ImmutableArray<string> FixableDiagnosticIds => ImmutableArray.Create(
-        LangFieldAttributeDiagnosticAnalyzer.s_UnexpectedAttributeTargets.Id
+        LangFieldAttributeDiagnosticAnalyzer.UnexpectedAttributeTargets.Id
     );
 
     public override FixAllProvider? GetFixAllProvider() => WellKnownFixAllProviders.BatchFixer;

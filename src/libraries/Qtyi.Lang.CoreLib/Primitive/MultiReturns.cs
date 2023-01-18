@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 
 namespace Qtyi.Runtime;
 
-public readonly struct MultiReturns : IMultiReturns
+public readonly struct MultiReturns : IMultiReturnsInternal
 {
     private readonly int _offset;
     private readonly int _count;

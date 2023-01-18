@@ -133,7 +133,7 @@ public partial class LangFieldAttributeTests
             writer.WriteLine($$"""
                 using System;
 
-                [AttributeUsage({|{{LangFieldAttributeDiagnosticAnalyzer.s_UnexpectedAttributeTargets.Id}}:{{validOnStr}}|})]
+                [AttributeUsage({|{{LangFieldAttributeDiagnosticAnalyzer.UnexpectedAttributeTargets.Id}}:{{validOnStr}}|})]
                 internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
                 {
                 """);
@@ -179,7 +179,7 @@ public partial class LangFieldAttributeTests
             writer.WriteLine($$"""
                 using System;
 
-                [AttributeUsage({|{{LangFieldAttributeDiagnosticAnalyzer.s_UnexpectedAttributeTargets.Id}}:{{validOnStr}}|},
+                [AttributeUsage({|{{LangFieldAttributeDiagnosticAnalyzer.UnexpectedAttributeTargets.Id}}:{{validOnStr}}|},
                     AllowMultiple = false, Inherited = true)]
                 internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
                 {
@@ -245,7 +245,7 @@ public partial class LangFieldAttributeTests
             writer.WriteLine($$"""
                 using System;
 
-                [AttributeUsage({|{{LangFieldAttributeDiagnosticAnalyzer.s_UnexpectedAttributeTargets.Id}}:{{validOnStr}}|})]
+                [AttributeUsage({|{{LangFieldAttributeDiagnosticAnalyzer.UnexpectedAttributeTargets.Id}}:{{validOnStr}}|})]
                 internal sealed class {{attributeName}} : {{baseAttributeType.FullName}}
                 {
                 """);

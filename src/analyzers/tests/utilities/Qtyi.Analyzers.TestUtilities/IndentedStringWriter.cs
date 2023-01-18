@@ -205,7 +205,7 @@ public abstract class IndentedStringWriter : StringWriter
         await base.WriteAsync(value, cancellationToken).ConfigureAwait(false);
     }
 #endif
-#endregion
+    #endregion
 
     #region WriteLine
     public override void WriteLine()
