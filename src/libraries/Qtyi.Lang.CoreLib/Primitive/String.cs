@@ -119,7 +119,7 @@ public sealed partial class String : Object, IComparable, IComparable<String?>, 
 
     public override string ToString() => Encoding.UTF8.GetString(this._value.ToArray());
 
-    protected override String? ToStringCore() => this;
+    protected override String ToStringCore() => this;
 
     public override TypeInfo GetTypeInfo() => TypeInfo.String;
 

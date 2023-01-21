@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <Compile Include="..\..\shared\IsExternalInit.cs" Link="CompilerServices\IsExternalInit.cs" />
+    <Compile Include="..\..\shared\NullableAttributes.cs" Link="CompilerServices\NullableAttributes.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,6 +22,7 @@
   
   <ItemGroup>
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
+    <PackageReference Include="System.Collections.Immutable" Version="6.0.0" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
     <PackageReference Include="System.Memory" Version="4.5.5" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
   </ItemGroup>
 

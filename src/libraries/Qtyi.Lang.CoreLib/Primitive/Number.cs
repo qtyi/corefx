@@ -77,6 +77,11 @@ public abstract class Number : Object, IComparable, IComparable<Number>, IEquata
     public static implicit operator Number(double value) => (Real)value;
     public static implicit operator Number(decimal value) => (DecimalReal)value;
     public static implicit operator String(Number value) => value.ToString() ?? string.Empty;
+
+    public static explicit operator int(Number value) => value.ChangeType<int>();
+    public static explicit operator long(Number value) => value.ChangeType<long>();
+    public static explicit operator float(Number value) => value.ChangeType<float>();
+    public static explicit operator double(Number value) => value.ChangeType<double>();
     #endregion
 
     #region Lua 操作符函数
@@ -314,7 +319,7 @@ public abstract class Number : Object, IComparable, IComparable<Number>, IEquata
             LargeInteger largeInteger => (ulong)largeInteger switch
             {
                 <= long.MaxValue => -(long)(ulong)largeInteger,
-                _ => -(decimal)largeInteger
+                _ => -(decimal)(ulong)largeInteger
             },
             _ => throw new NotSupportedException()
         };

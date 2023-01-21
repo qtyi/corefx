@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace Qtyi.Runtime;
 
-internal class InvalidLengthOperationException : Exception
+public class InvalidLengthOperationException : Exception
 {
     public InvalidLengthOperationException() : base() { }
 

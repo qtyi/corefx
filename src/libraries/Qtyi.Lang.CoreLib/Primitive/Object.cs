@@ -12,7 +12,7 @@ namespace Qtyi.Runtime;
 /// <summary>
 /// 提供 Lua 的所有此实例的基类。此类必须被继承，不可直接实例化。
 /// </summary>
-public abstract partial class Object : IDynamicMetaObjectProvider
+public abstract partial class Object
 {
     /// <summary>
     /// 获取或设置此实例中特定键对应的值。
@@ -84,7 +84,8 @@ public abstract partial class Object : IDynamicMetaObjectProvider
                     expressionType switch
                     {
                         CallerArgumentExpressionType.Field => $"attempt to get length of field '{expressionNames.Last()}' (a {typeInfo} value)",
-                        CallerArgumentExpressionType.Global => $"attempt to get length of global '{expressionNames.Last()}' (a {typeInfo} value)"
+                        CallerArgumentExpressionType.Global => $"attempt to get length of global '{expressionNames.Last()}' (a {typeInfo} value)",
+                        _ => $"attempt to get length of object (a {typeInfo} value)"
                     },
                 innerException);
         }
@@ -284,4 +285,30 @@ public abstract partial class Object : IDynamicMetaObjectProvider
         Delegate => (Object)(Delegate)value,
         _ => Userdata.Wrap(value)
     };
+
+    public static MultiReturns Pairs(Object obj)
+    {
+        if (obj is null) throw new ArgumentNullException(nameof(obj));
+
+        var mvPairs = obj.GetMetavalue(Qtyi.Runtime.Metatable.Metavalue_IterateOperation);
+        if (mvPairs is null || !mvPairs.IsCallable)
+            return new(
+                (Function)new Func<Table, Object?, MultiReturns<Object, Object>>(Table.Next),
+                obj,
+                null
+            );
+
+        return mvPairs.Invoke(obj);
+    }
+
+    public static MultiReturns<Function, Object, Number> Ipairs(Object obj)
+    {
+        if (obj is null) throw new ArgumentNullException(nameof(obj));
+
+        return new(
+            new Func<Object, Number, MultiReturns<Number>>((_, i) => new(i++)),
+            obj,
+            0L
+        );
+    }
 }

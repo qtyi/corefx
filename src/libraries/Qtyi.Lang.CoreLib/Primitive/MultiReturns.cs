@@ -4,15 +4,12 @@
 
 using System.Collections;
 using System.Diagnostics;
-using System.Dynamic;
-using System.Linq.Expressions;
 
 namespace Qtyi.Runtime;
 
 public readonly struct MultiReturns : IMultiReturnsInternal
 {
     private readonly int _offset;
-    private readonly int _count;
     private readonly Object?[] _values;
 
     public static MultiReturns Empty => new();
@@ -23,37 +20,27 @@ public readonly struct MultiReturns : IMultiReturnsInternal
         {
             Debug.Assert(index >= 0);
 
-            if (index < this._count)
+            if (this._offset + index < this._values.Length)
                 return this._values[this._offset + index];
             else
                 return null;
         }
     }
 
-    public int Count => this._count;
+    public int Count => this._values.Length;
 
     private MultiReturns(int offset, Object?[] values)
     {
         Debug.Assert(offset >= 0);
         this._offset = offset;
         this._values = values;
-        this._count = 0;
-        for (int i = offset, length = values.Length; i < length; i++)
-        {
-            if (values[i] is not null)
-                this._count = i - offset + 1;
-        }
     }
 
     public MultiReturns(params Object?[] values) : this(offset: 0, (Object?[])values.Clone()) { }
 
-    public IEnumerator<Object?> GetEnumerator()
-    {
-        for (var i = 0; i < this._count; i++)
-            yield return this._values[i + this._offset];
-    }
+    public IEnumerator<Object?> GetEnumerator() => ((IEnumerable<Object?>)this._values).GetEnumerator();
 
-    IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => this._values.GetEnumerator();
 
     #region 解构
     public void Deconstruct(out Object? value1) => value1 = this[0];
@@ -179,76 +166,76 @@ public readonly struct MultiReturns : IMultiReturnsInternal
             object? rObj = null;
             if (typeDef == typeof(MultiReturns<>))
             {
-                var arg1 = getArg(0);
+                var arg1 = GetArg(0);
                 rObj = Activator.CreateInstance(type, arg1);
             }
             else if (typeDef == typeof(MultiReturns<,>))
             {
-                var arg1 = getArg(0);
-                var arg2 = getArg(1);
+                var arg1 = GetArg(0);
+                var arg2 = GetArg(1);
                 rObj = Activator.CreateInstance(type, arg1, arg2);
             }
             else if (typeDef == typeof(MultiReturns<,,>))
             {
-                var arg1 = getArg(0);
-                var arg2 = getArg(1);
-                var arg3 = getArg(2);
+                var arg1 = GetArg(0);
+                var arg2 = GetArg(1);
+                var arg3 = GetArg(2);
                 rObj = Activator.CreateInstance(type, arg1, arg2, arg3);
             }
             else if (typeDef == typeof(MultiReturns<,,,>))
             {
-                var arg1 = getArg(0);
-                var arg2 = getArg(1);
-                var arg3 = getArg(2);
-                var arg4 = getArg(3);
+                var arg1 = GetArg(0);
+                var arg2 = GetArg(1);
+                var arg3 = GetArg(2);
+                var arg4 = GetArg(3);
                 rObj = Activator.CreateInstance(type, arg1, arg2, arg3, arg4);
             }
             else if (typeDef == typeof(MultiReturns<,,,,>))
             {
-                var arg1 = getArg(0);
-                var arg2 = getArg(1);
-                var arg3 = getArg(2);
-                var arg4 = getArg(3);
-                var arg5 = getArg(4);
+                var arg1 = GetArg(0);
+                var arg2 = GetArg(1);
+                var arg3 = GetArg(2);
+                var arg4 = GetArg(3);
+                var arg5 = GetArg(4);
                 rObj = Activator.CreateInstance(type, arg1, arg2, arg3, arg4, arg5);
             }
             else if (typeDef == typeof(MultiReturns<,,,,,>))
             {
-                var arg1 = getArg(0);
-                var arg2 = getArg(1);
-                var arg3 = getArg(2);
-                var arg4 = getArg(3);
-                var arg5 = getArg(4);
-                var arg6 = getArg(5);
+                var arg1 = GetArg(0);
+                var arg2 = GetArg(1);
+                var arg3 = GetArg(2);
+                var arg4 = GetArg(3);
+                var arg5 = GetArg(4);
+                var arg6 = GetArg(5);
                 rObj = Activator.CreateInstance(type, arg1, arg2, arg3, arg4, arg5, arg6);
             }
             else if (typeDef == typeof(MultiReturns<,,,,,,>))
             {
-                var arg1 = getArg(0);
-                var arg2 = getArg(1);
-                var arg3 = getArg(2);
-                var arg4 = getArg(3);
-                var arg5 = getArg(4);
-                var arg6 = getArg(5);
-                var arg7 = getArg(6);
+                var arg1 = GetArg(0);
+                var arg2 = GetArg(1);
+                var arg3 = GetArg(2);
+                var arg4 = GetArg(3);
+                var arg5 = GetArg(4);
+                var arg6 = GetArg(5);
+                var arg7 = GetArg(6);
                 rObj = Activator.CreateInstance(type, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
             }
             else if (typeDef == typeof(MultiReturns<,,,,,,,>))
             {
-                var arg1 = getArg(0);
-                var arg2 = getArg(1);
-                var arg3 = getArg(2);
-                var arg4 = getArg(3);
-                var arg5 = getArg(4);
-                var arg6 = getArg(5);
-                var arg7 = getArg(6);
+                var arg1 = GetArg(0);
+                var arg2 = GetArg(1);
+                var arg3 = GetArg(2);
+                var arg4 = GetArg(3);
+                var arg5 = GetArg(4);
+                var arg6 = GetArg(5);
+                var arg7 = GetArg(6);
                 var rest = CreateInstance(typeArgs[7], 7 + offset, values);
                 rObj = Activator.CreateInstance(type, arg1, arg2, arg3, arg4, arg5, arg6, arg7, rest);
             }
 
             if (rObj is not null) return rObj;
 
-            Object? getArg(int index)
+            Object? GetArg(int index)
             {
                 var i = index + offset;
                 if (i >= count) return null;

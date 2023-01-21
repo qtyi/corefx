@@ -11,7 +11,7 @@ using System.Text;
 
 namespace Qtyi.Runtime;
 
-partial class Object
+partial class Object : IDynamicMetaObjectProvider
 {
     protected class ObjectDynamicMetaObject : DynamicMetaObject
     {

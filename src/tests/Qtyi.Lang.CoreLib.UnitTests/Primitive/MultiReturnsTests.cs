@@ -5,7 +5,6 @@
 namespace Qtyi.Lang.CoreLib.UnitTests;
 
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using Qtyi.Runtime;
 
 public class MultiReturnsTests : PrimitiveTestBase

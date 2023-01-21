@@ -15,7 +15,7 @@ internal sealed class Real : Number, IComparable<Real>, IComparable<double>, IEq
     {
         Real real => this._value.CompareTo(real._value),
         DecimalReal decimalReal => this._value.CompareTo((object)(decimal)decimalReal),
-        Integer integer => this._value.CompareTo((object)(int)integer),
+        Integer integer => this._value.CompareTo((object)(int)(long)integer),
         LargeInteger largeInteger => this._value.CompareTo((object)(ulong)largeInteger),
         _ => -other.CompareTo(this._value)
     };
@@ -32,7 +32,7 @@ internal sealed class Real : Number, IComparable<Real>, IComparable<double>, IEq
     {
         Real real => this._value.Equals(real._value),
         DecimalReal decimalReal => this._value.Equals((object)(decimal)decimalReal),
-        Integer integer => this._value.Equals((object)(int)integer),
+        Integer integer => this._value.Equals((object)(int)(long)integer),
         LargeInteger largeInteger => this._value.Equals((object)(ulong)largeInteger),
         _ => other.Equals(this._value)
     };
