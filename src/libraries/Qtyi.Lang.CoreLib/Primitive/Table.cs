@@ -49,10 +49,10 @@ public partial class Table : Object, IList<Object>, IDictionary<Object, Object>
     protected long GetCount(long offset = 1L)
     {
         Debug.Assert(offset >= 1);
-        for (var i = 1L; ; i++)
+        for (var i = 0L; ; i++)
         {
             if (!this.dictionary.ContainsKey(i + offset))
-                return i - 1L;
+                return i - 0L;
         }
     }
 

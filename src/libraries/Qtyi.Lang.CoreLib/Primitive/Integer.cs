@@ -2,9 +2,12 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace Qtyi.Runtime;
 
 #pragma warning disable CA1067
+[DebuggerDisplay("{_value}")]
 internal sealed class Integer : Number, IComparable<Integer>, IComparable<long>, IEquatable<Integer>, IEquatable<long>, IConvertible, IFormattable
 {
     private readonly long _value;

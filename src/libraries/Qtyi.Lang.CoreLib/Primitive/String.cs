@@ -2,20 +2,18 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Buffers;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace Qtyi.Runtime;
 
+[DebuggerDisplay("\"{ToString(),nq}\"")]
 public sealed partial class String : Object, IComparable, IComparable<String?>, IComparable<string>, IEquatable<String>, IEquatable<string>, ICloneable, IConvertible
 {
     private readonly ReadOnlyMemory<byte> _value;
 
     private String(ReadOnlyMemory<byte> value) => this._value = value;
-    private String(string value) => this._value = Encoding.UTF8.GetBytes(value);
+    private String(string value) => this._value = Encoding.Default.GetBytes(value);
 
     static String()
     {
@@ -115,9 +113,9 @@ public sealed partial class String : Object, IComparable, IComparable<String?>, 
     /// </summary>
     public override Object? Length => this._value.Length;
 
-    public override int GetHashCode() => this._value.GetHashCode();
+    public override int GetHashCode() => EqualityComparer.Default.GetHashCode(this);
 
-    public override string ToString() => Encoding.UTF8.GetString(this._value.ToArray());
+    public override string ToString() => Encoding.Default.GetString(this._value.ToArray());
 
     protected override String ToStringCore() => this;
 

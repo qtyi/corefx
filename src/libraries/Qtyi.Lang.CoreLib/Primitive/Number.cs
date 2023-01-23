@@ -52,6 +52,7 @@ public abstract class Number : Object, IComparable, IComparable<Number>, IEquata
     };
 
     #region Object
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     internal static Table? s_mt;
 
     protected internal override Table? Metatable

@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Qtyi.Runtime;
 
+[DebuggerDisplay("{_value}")]
 public sealed class Boolean : Object, IComparable, IComparable<Boolean>, IComparable<bool>, IEquatable<Boolean>, IEquatable<bool>
 {
     private readonly bool _value;
@@ -91,6 +92,6 @@ public sealed class Boolean : Object, IComparable, IComparable<Boolean>, ICompar
     public static bool operator !=(Boolean left, Boolean right) => !left.Equals(right);
 
     public static implicit operator Boolean(bool value) => new(value);
-    public static implicit operator bool(Boolean value) => value._value;
+    public static implicit operator bool(Boolean? value) => value is not null && value._value;
     #endregion
 }

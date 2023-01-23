@@ -2,12 +2,7 @@
 // The Qtyi licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-
-//[assembly: LuaField("table.sort", UnderlyingType = typeof(Table), MemberName = nameof(Table.Sort))]
 
 using Qtyi.Runtime.CompilerServices;
 
@@ -87,5 +82,35 @@ public static class TableModel
             values[index] = list[index];
         }
         return new(values);
+    }
+
+    [LuaField("table.sort")]
+    public static void Sort(Table list, Function? comp)
+    {
+        var sorted = ((IEnumerable<Object>)list).OrderBy(static item => item, comp is not null ? new TableSortComparer(comp) : Comparer<Object>.Default).ToArray();
+        for (long index = 1L, length = sorted.LongLength; index < length; index++)
+        {
+            Table.RawSet(list, index, sorted[index]);
+        }
+    }
+
+    [LuaFieldIgnore]
+    internal sealed class TableSortComparer : IComparer<Object>
+    {
+        private readonly Function _comp;
+
+        public TableSortComparer(Function comp) => this._comp = comp;
+
+        public int Compare(Object? x, Object? y)
+        {
+            Debug.Assert(x is not null);
+            Debug.Assert(y is not null);
+
+            var result = _comp.Invoke(x, y)[0] as Boolean;
+            if (result)
+                return -1;
+            else
+                return 0;
+        }
     }
 }
